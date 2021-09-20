@@ -12,30 +12,30 @@ The latest stable version of BYOND.
 
 A specific version of BYOND.
 
-## Usage
-
-### DreamDaemon (Hosting)
+## DreamDaemon (Hosting)
 
 Example usage to host your projects.
 
-#### Docker Run
+### Docker Run
+
+```sh
+docker run --volume /opt/mygame:/opt/mygame --publish 1337:1337 douglasparker/byond:latest DreamMaker /opt/mygame/mygame.dmb
+```
+
+### Docker Compose
 
 Examples coming soon!
 
-#### Docker Compose
-
-Examples coming soon!
-
-### DreamMaker (Compile)
+## DreamMaker (Compile)
 
 Example usage to build and compile your projects.
 
-#### Docker Run
+### Docker Run
 
 ```sh
-docker run -v /opt/game:/opt/game douglasparker/byond:514.1566 DreamMaker /opt/game/game.dme
+docker run --volume /opt/mygame:/opt/mygame douglasparker/byond:latest DreamMaker /opt/mygame/mygame.dme
 ```
 
-#### Docker Compose
+### Docker Compose
 
 Examples coming soon!
