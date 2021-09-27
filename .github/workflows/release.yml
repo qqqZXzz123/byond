@@ -31,7 +31,7 @@ jobs:
           path: |
             ${{ github.workspace }}/VERSION
             ${{ github.workspace }}/images.tar
-          key: ${{ github.sha }}
+          key: $(cat ${{ github.workspace }}/VERSION)
   
   Release:
     runs-on: ubuntu-20.04
@@ -44,7 +44,7 @@ jobs:
           path: |
             ${{ github.workspace }}/VERSION
             ${{ github.workspace }}/images.tar
-          key: ${{ github.sha }}
+          key: $(cat ${{ github.workspace }}/VERSION)
       
       - name: Load docker images
         run: |
