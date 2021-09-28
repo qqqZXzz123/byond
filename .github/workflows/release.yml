@@ -8,7 +8,7 @@ on:
       version:
         required: true
         default: latest
-        description: The BYOND Version that you want to release.
+        description: "BYOND Version"
 
 jobs:
   Build:
@@ -19,8 +19,8 @@ jobs:
       
       - name: Check for latest BYOND version
         run: |
-          if [ "${{ github.event.inputs.server }}" != "latest" ]; then
-            echo "${{ github.event.inputs.server }}" > VERSION
+          if [ "${{ github.event.inputs.version }}" != "latest" ]; then
+            echo "${{ github.event.inputs.version }}" > VERSION
           else
             curl https://secure.byond.com/download/version.txt -o VERSION
           fi
