@@ -1,6 +1,6 @@
 # BYOND
 
-A BYOND image for compiling and hosting games made in the BYOND Engine.
+A docker image for building and hosting games made in the BYOND Engine.
 
 ## Tags
 
@@ -12,7 +12,7 @@ The latest stable version of BYOND.
 
 A specific version of BYOND.
 
-## DreamDaemon (Hosting)
+## DreamDaemon (Host)
 
 Example usage to host your projects.
 
@@ -26,9 +26,9 @@ docker run --volume /opt/mygame:/opt/mygame --publish 1337:1337 douglasparker/by
 
 Examples coming soon!
 
-## DreamMaker (Compile)
+## DreamMaker (Build)
 
-Example usage to build and compile your projects.
+Example usage to build your projects.
 
 ### Docker Run
 
