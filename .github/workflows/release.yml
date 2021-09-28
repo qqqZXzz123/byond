@@ -27,11 +27,19 @@ jobs:
 
       - name: Build docker images
         run: |
-          docker build --build-arg BYOND_MAJOR=$(echo "$(cut -d'.' -f1 <<< $(cat ${{ github.workspace }}/VERSION))") --build-arg BYOND_MINOR=$(echo "$(cut -d'.' -f2 <<< $(cat ${{ github.workspace }}/VERSION))") -t douglasparker/byond:$(cat ${{ github.workspace }}/VERSION) -t douglasparker/byond:latest -t ghcr.io/douglasparker/byond:$(cat ${{ github.workspace }}/VERSION) -t ghcr.io/douglasparker/byond:latest .
+          if [ "${{ github.event.inputs.version }}" != "latest" ]; then
+            docker build --build-arg BYOND_MAJOR=$(echo "$(cut -d'.' -f1 <<< $(cat ${{ github.workspace }}/VERSION))") --build-arg BYOND_MINOR=$(echo "$(cut -d'.' -f2 <<< $(cat ${{ github.workspace }}/VERSION))") -t douglasparker/byond:$(cat ${{ github.workspace }}/VERSION) -t ghcr.io/douglasparker/byond:$(cat ${{ github.workspace }}/VERSION) .
+          else
+            docker build --build-arg BYOND_MAJOR=$(echo "$(cut -d'.' -f1 <<< $(cat ${{ github.workspace }}/VERSION))") --build-arg BYOND_MINOR=$(echo "$(cut -d'.' -f2 <<< $(cat ${{ github.workspace }}/VERSION))") -t douglasparker/byond:$(cat ${{ github.workspace }}/VERSION) -t douglasparker/byond:latest -t ghcr.io/douglasparker/byond:$(cat ${{ github.workspace }}/VERSION) -t ghcr.io/douglasparker/byond:latest .
+          fi
       
       - name: Save docker images
         run: |
-          docker save --output ${{ github.workspace }}/images.tar douglasparker/byond:$(cat ${{ github.workspace }}/VERSION) douglasparker/byond:latest ghcr.io/douglasparker/byond:$(cat ${{ github.workspace }}/VERSION) ghcr.io/douglasparker/byond:latest
+          if [ "${{ github.event.inputs.version }}" != "latest" ]; then
+            docker save --output ${{ github.workspace }}/images.tar douglasparker/byond:$(cat ${{ github.workspace }}/VERSION) ghcr.io/douglasparker/byond:$(cat ${{ github.workspace }}/VERSION)
+          else
+            docker save --output ${{ github.workspace }}/images.tar douglasparker/byond:$(cat ${{ github.workspace }}/VERSION) douglasparker/byond:latest ghcr.io/douglasparker/byond:$(cat ${{ github.workspace }}/VERSION) ghcr.io/douglasparker/byond:latest
+          fi
 
       - name: Cache build artifacts
         uses: actions/cache@v2
@@ -62,11 +70,19 @@ jobs:
       - name: Publish releases to Docker Hub
         run: |
           docker login -u "${{ secrets.DOCKER_REGISTRY_USERNAME }}" -p "${{ secrets.DOCKER_REGISTRY_PASSWORD }}"
-          docker push douglasparker/byond:$(cat ${{ github.workspace }}/VERSION)
-          docker push douglasparker/byond:latest
+          if [ "${{ github.event.inputs.version }}" != "latest" ]; then
+            docker push douglasparker/byond:$(cat ${{ github.workspace }}/VERSION)
+          else
+            docker push douglasparker/byond:$(cat ${{ github.workspace }}/VERSION)
+            docker push douglasparker/byond:latest
+          fi
       
       - name: Publish releases to GitHub Container Registry
         run: |
           docker login ghcr.io -u "${{ secrets.GH_CONTAINER_REGISTRY_USERNAME }}" -p "${{ secrets.GH_CONTAINER_REGISTRY_PASSWORD }}"
-          docker push ghcr.io/douglasparker/byond:$(cat ${{ github.workspace }}/VERSION)
-          docker push ghcr.io/douglasparker/byond:latest
+          if [ "${{ github.event.inputs.version }}" != "latest" ]; then
+            docker push ghcr.io/douglasparker/byond:$(cat ${{ github.workspace }}/VERSION)
+          else
+            docker push ghcr.io/douglasparker/byond:$(cat ${{ github.workspace }}/VERSION)
+            docker push ghcr.io/douglasparker/byond:latest
+          fi
