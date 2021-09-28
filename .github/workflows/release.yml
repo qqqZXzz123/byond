@@ -6,6 +6,8 @@ on:
   workflow_dispatch:
     inputs:
       version:
+        required: true
+        default: latest
         description: The BYOND Version that you want to release.
 
 jobs:
@@ -17,8 +19,8 @@ jobs:
       
       - name: Check for latest BYOND version
         run: |
-          if [ -z "${{ github.event.inputs.server }}" ]; then
-            cat "${{ github.event.inputs.server }}" > VERSION
+          if [ "${{ github.event.inputs.server }}" != "latest" ]; then
+            echo "${{ github.event.inputs.server }}" > VERSION
           else
             curl https://secure.byond.com/download/version.txt -o VERSION
           fi
