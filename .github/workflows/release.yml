@@ -17,7 +17,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
       
-      - name: Check for latest BYOND version
+      - name: Check for BYOND version
         run: |
           if [ "${{ github.event.inputs.version }}" == "latest" ] || [ "${{ github.event.inputs.version }}" == "" ]; then
             curl https://secure.byond.com/download/version.txt -o VERSION
