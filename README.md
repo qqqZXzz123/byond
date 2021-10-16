@@ -19,7 +19,12 @@ Example usage to host your projects.
 ### Docker Run
 
 ```sh
-docker run --volume /opt/mygame:/opt/mygame --publish 1337:1337 douglasparker/byond:latest DreamMaker /opt/mygame/mygame.dmb
+docker run --detach \
+  --name mygame \
+  --volume /opt/mygame:/opt/mygame \
+  --publish 1337:1337 \
+  --restart unless-stopped \
+  douglasparker/byond:latest DreamDaemon /opt/mygame/mygame.dmb -ports 1337
 ```
 
 ### Docker Compose
@@ -33,7 +38,9 @@ Example usage to build your projects.
 ### Docker Run
 
 ```sh
-docker run --volume /opt/mygame:/opt/mygame douglasparker/byond:latest DreamMaker /opt/mygame/mygame.dme
+docker run \
+  --volume /opt/mygame:/opt/mygame \
+  douglasparker/byond:latest DreamMaker /opt/mygame/mygame.dme
 ```
 
 ### Docker Compose
