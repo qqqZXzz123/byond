@@ -22,7 +22,7 @@ Example usage to host your projects.
 
 ### Docker Run
 
-```sh
+```docker
 docker run --detach \
   --name mygame \
   --volume /opt/mygame:/opt/mygame \
@@ -33,7 +33,20 @@ docker run --detach \
 
 ### Docker Compose
 
-Examples coming soon!
+#### docker-compose.yml
+
+```docker
+services:
+  byond:
+    image: douglasparker/byond:latest
+    container_name: "mygame"
+    command: "DreamDaemon /opt/mygame/mygame.dmb -ports 1337"
+    volumes:
+      - /opt/mygame:/opt/mygame
+    ports:
+      - 1337:1337
+    restart: unless-stopped
+```
 
 ## DreamMaker (Build)
 
@@ -41,12 +54,8 @@ Example usage to build your projects.
 
 ### Docker Run
 
-```sh
+```docker
 docker run \
   --volume /opt/mygame:/opt/mygame \
   douglasparker/byond:latest DreamMaker /opt/mygame/mygame.dme
 ```
-
-### Docker Compose
-
-Examples coming soon!
