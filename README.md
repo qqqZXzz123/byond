@@ -1,5 +1,9 @@
 # BYOND
 
+[![Open in Visual Studio Code](https://open.vscode.dev/badges/open-in-vscode.svg)](https://open.vscode.dev/douglasparker/byond)
+[![Docker Pulls](https://img.shields.io/docker/pulls/douglasparker/byond)](https://hub.docker.com/r/douglasparker/byond)
+[![License](https://img.shields.io/github/license/douglasparker/byond)](https://github.com/douglasparker/byond/blob/release/LICENSE)
+
 A docker image for building and hosting games made in the BYOND Engine.
 
 ## Tags
