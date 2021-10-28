@@ -24,11 +24,11 @@ Example usage to host your projects.
 
 ```docker
 docker run --detach \
-  --name mygame \
-  --volume /opt/mygame:/opt/mygame \
+  --name game \
+  --volume /opt/game:/opt/game \
   --publish 1337:1337 \
   --restart unless-stopped \
-  douglasparker/byond:latest DreamDaemon /opt/mygame/mygame.dmb -ports 1337
+  douglasparker/byond:latest DreamDaemon /opt/game/game.dmb -ports 1337
 ```
 
 ### Docker Compose
@@ -39,10 +39,10 @@ docker run --detach \
 services:
   byond:
     image: douglasparker/byond:latest
-    container_name: "mygame"
-    command: "DreamDaemon /opt/mygame/mygame.dmb -ports 1337"
+    container_name: "game"
+    command: "DreamDaemon /opt/game/game.dmb -ports 1337"
     volumes:
-      - /opt/mygame:/opt/mygame
+      - /opt/game:/opt/game
     ports:
       - 1337:1337
     restart: unless-stopped
@@ -56,6 +56,6 @@ Example usage to build your projects.
 
 ```docker
 docker run \
-  --volume /opt/mygame:/opt/mygame \
-  douglasparker/byond:latest DreamMaker /opt/mygame/mygame.dme
+  --volume /opt/game:/opt/game \
+  douglasparker/byond:latest DreamMaker /opt/game/game.dme
 ```
