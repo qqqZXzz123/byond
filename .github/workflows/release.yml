@@ -95,3 +95,5 @@ jobs:
       
       - name: Run Keepalive Workflow
         uses: gautamkrishnar/keepalive-workflow@master
+        with:
+          commit_message: "chore(ci): automated commit to prevent GitHub from disabling scheduled workflows"
