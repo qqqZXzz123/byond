@@ -86,3 +86,12 @@ jobs:
           else
             docker push ghcr.io/douglasparker/byond:$(cat ${{ github.workspace }}/VERSION)
           fi
+
+  Keepalive Workflow:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      
+      - name: Run Keepalive Workflow
+        uses: gautamkrishnar/keepalive-workflow@master
