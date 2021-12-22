@@ -87,7 +87,7 @@ jobs:
             docker push ghcr.io/douglasparker/byond:$(cat ${{ github.workspace }}/VERSION)
           fi
 
-  Keepalive Workflow:
+  Keepalive-Workflow:
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout repository
