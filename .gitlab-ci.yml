@@ -14,6 +14,9 @@ build:
     policy: push
   script:
     - |
+      echo "Installing dependencies..."
+      apt install curl -y
+
       echo "Checking for BYOND version..."
       if [ "$VERSION" == "latest" ] || [ "$VERSION" == "" ]; then
         curl https://secure.byond.com/download/version.txt -o VERSION
@@ -35,7 +38,6 @@ build:
         docker save --output $CI_PROJECT_DIR/images.tar douglasparker/byond:$(cat $CI_PROJECT_DIR/VERSION) ghcr.io/douglasparker/byond:$(cat $CI_PROJECT_DIR/VERSION)
       fi
 
-
 release:
   only:
     - schedules
@@ -48,6 +50,9 @@ release:
     policy: pull
   script:
     - |
+      echo "Installing dependencies..."
+      apt install curl -y
+      
       echo "Loading docker images..."
       docker load --input $CI_PROJECT_DIR/images.tar
 
