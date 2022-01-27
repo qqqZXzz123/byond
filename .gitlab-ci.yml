@@ -6,7 +6,6 @@ variables:
 build:
   only:
     - schedules
-  allow_failure: true
   cache:
     key: $CI_PIPELINE_ID
     paths:
@@ -44,7 +43,6 @@ release:
   only:
     - schedules
   needs: ["build"]
-  allow_failure: true
   cache:
     key: $CI_PIPELINE_ID
     paths:
