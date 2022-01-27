@@ -15,9 +15,9 @@ build:
   script:
     - |
       echo "Installing dependencies..."
-      apt-get update
-      apt-get install curl -y
-      
+      apk update
+      apk add curl
+
       echo "Checking for BYOND version..."
       if [ "$VERSION" == "latest" ] || [ "$VERSION" == "" ]; then
         curl https://secure.byond.com/download/version.txt -o VERSION
@@ -52,8 +52,8 @@ release:
   script:
     - |
       echo "Installing dependencies..."
-      apt-get update
-      apt-get install curl -y
+      apk update
+      apk add curl
 
       echo "Loading docker images..."
       docker load --input $CI_PROJECT_DIR/images.tar
