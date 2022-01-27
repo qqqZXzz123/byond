@@ -15,7 +15,8 @@ build:
   script:
     - |
       echo "Installing dependencies..."
-      apt install curl -y
+      apt-get update
+      apt-get install curl -y
 
       echo "Checking for BYOND version..."
       if [ "$VERSION" == "latest" ] || [ "$VERSION" == "" ]; then
@@ -51,8 +52,9 @@ release:
   script:
     - |
       echo "Installing dependencies..."
-      apt install curl -y
-      
+      apt-get update
+      apt-get install curl -y
+
       echo "Loading docker images..."
       docker load --input $CI_PROJECT_DIR/images.tar
 
