@@ -58,20 +58,40 @@ release:
       echo "Loading docker images..."
       docker load --input $CI_PROJECT_DIR/images.tar
 
-      echo "Publishing releases to Docker Hub..."
+      echo "Logging into Docker Hub..."
       docker login -u "$DOCKER_REGISTRY_USERNAME" -p "$DOCKER_REGISTRY_PASSWORD"
-      if [ "$VERSION" == "latest" ] || [ "$VERSION" == "" ]; then
-        docker push douglasparker/byond:$(cat $CI_PROJECT_DIR/VERSION)
-        docker push douglasparker/byond:latest
+
+      echo "Checking for an existing release on Docker Hub..."
+      docker image inspect douglasparker/byond:$(cat $CI_PROJECT_DIR/VERSION)
+      if [ $? == 0 ]; then
+        
+        echo "Publishing releases to Docker Hub..."
+        if [ "$VERSION" == "latest" ] || [ "$VERSION" == "" ]; then
+          docker push douglasparker/byond:$(cat $CI_PROJECT_DIR/VERSION)
+          docker push douglasparker/byond:latest
+        else
+          docker push douglasparker/byond:$(cat $CI_PROJECT_DIR/VERSION)
+        fi
+
       else
-        docker push douglasparker/byond:$(cat $CI_PROJECT_DIR/VERSION)
+        echo "The docker image douglasparker/byond:$(cat $CI_PROJECT_DIR/VERSION) already exists on Docker Hub."
       fi
 
-      echo "Publishing releases to GitHub Container Registry..."
+      echo "Logging into the GitHub Container Registry..."
       docker login ghcr.io -u "$GH_CONTAINER_REGISTRY_USERNAME" -p "$GH_CONTAINER_REGISTRY_PASSWORD"
-      if [ "$VERSION" == "latest" ] || [ "$VERSION" == "" ]; then
-        docker push ghcr.io/douglasparker/byond:$(cat $CI_PROJECT_DIR/VERSION)
-        docker push ghcr.io/douglasparker/byond:latest
+
+      echo "Checking for an existing release on the GitHub Container Registry..."
+      docker image inspect ghcr.io/douglasparker/byond:$(cat $CI_PROJECT_DIR/VERSION)
+      if [ $? == 0 ]; then
+
+        echo "Publishing releases to the GitHub Container Registry..."
+        if [ "$VERSION" == "latest" ] || [ "$VERSION" == "" ]; then
+          docker push ghcr.io/douglasparker/byond:$(cat $CI_PROJECT_DIR/VERSION)
+          docker push ghcr.io/douglasparker/byond:latest
+        else
+          docker push ghcr.io/douglasparker/byond:$(cat $CI_PROJECT_DIR/VERSION)
+        fi
+
       else
-        docker push ghcr.io/douglasparker/byond:$(cat $CI_PROJECT_DIR/VERSION)
+        echo "The docker image ghcr.io/douglasparker/byond:$(cat $CI_PROJECT_DIR/VERSION) already exists on the GitHub Container Registry."
       fi
