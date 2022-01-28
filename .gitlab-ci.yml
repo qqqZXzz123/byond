@@ -63,8 +63,8 @@ release:
 
       echo "Checking for an existing release on Docker Hub..."
       docker image inspect douglasparker/byond:$(cat $CI_PROJECT_DIR/VERSION)
-      if [ $? == 0 ]; then
-        
+      if [ $? == 1 ]; then
+
         echo "Publishing releases to Docker Hub..."
         if [ "$VERSION" == "latest" ] || [ "$VERSION" == "" ]; then
           docker push douglasparker/byond:$(cat $CI_PROJECT_DIR/VERSION)
@@ -82,7 +82,7 @@ release:
 
       echo "Checking for an existing release on the GitHub Container Registry..."
       docker image inspect ghcr.io/douglasparker/byond:$(cat $CI_PROJECT_DIR/VERSION)
-      if [ $? == 0 ]; then
+      if [ $? == 1 ]; then
 
         echo "Publishing releases to the GitHub Container Registry..."
         if [ "$VERSION" == "latest" ] || [ "$VERSION" == "" ]; then
