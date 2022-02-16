@@ -1,6 +1,5 @@
 # BYOND
 
-[![Open in Visual Studio Code](https://open.vscode.dev/badges/open-in-vscode.svg)](https://open.vscode.dev/douglasparker/byond)
 [![Docker Pulls](https://img.shields.io/docker/pulls/douglasparker/byond)](https://hub.docker.com/r/douglasparker/byond)
 [![License](https://img.shields.io/github/license/douglasparker/byond)](https://github.com/douglasparker/byond/blob/release/LICENSE)
 
@@ -55,7 +54,7 @@ Example usage to build your projects.
 ### Docker Run
 
 ```docker
-docker run \
+docker run --rm \
   --volume /opt/game:/opt/game \
   douglasparker/byond:latest DreamMaker /opt/game/game.dme
 ```
