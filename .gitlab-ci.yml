@@ -49,6 +49,9 @@ release:
       - $CI_PROJECT_DIR/VERSION
       - $CI_PROJECT_DIR/images.tar
     policy: pull
+  allow_failure:
+    exit_codes:
+      - 1
   script:
     - |
       echo "Installing dependencies..."
