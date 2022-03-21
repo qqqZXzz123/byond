@@ -51,6 +51,9 @@ release:
     policy: pull
   script:
     - |
+      echo "Disabling exit on error (non-zero exit code)..."
+      set +e
+
       echo "Installing dependencies..."
       apk update
       apk add curl
@@ -62,8 +65,8 @@ release:
       docker login -u "$DOCKER_REGISTRY_USERNAME" -p "$DOCKER_REGISTRY_PASSWORD"
 
       echo "Checking for an existing release on Docker Hub..."
-      DOCKER_MANIFEST=$(docker manifest inspect douglasparker/byond:$(cat $CI_PROJECT_DIR/VERSION))
-      if [ $DOCKER_MANIFEST == 1 ]; then
+      docker manifest inspect douglasparker/byond:$(cat $CI_PROJECT_DIR/VERSION)
+      if [ $? == 1 ]; then
 
         echo "Publishing releases to Docker Hub..."
         if [ "$VERSION" == "latest" ] || [ "$VERSION" == "" ]; then
@@ -81,8 +84,8 @@ release:
       docker login ghcr.io -u "$GH_CONTAINER_REGISTRY_USERNAME" -p "$GH_CONTAINER_REGISTRY_PASSWORD"
 
       echo "Checking for an existing release on the GitHub Container Registry..."
-      DOCKER_MANIFEST=$(docker manifest inspect ghcr.io/douglasparker/byond:$(cat $CI_PROJECT_DIR/VERSION))
-      if [ $DOCKER_MANIFEST == 1 ]; then
+      docker manifest inspect ghcr.io/douglasparker/byond:$(cat $CI_PROJECT_DIR/VERSION)
+      if [ $? == 1 ]; then
 
         echo "Publishing releases to the GitHub Container Registry..."
         if [ "$VERSION" == "latest" ] || [ "$VERSION" == "" ]; then
