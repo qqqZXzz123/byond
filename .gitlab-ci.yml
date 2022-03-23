@@ -1,7 +1,8 @@
 image: docker:20-dind
 
 variables:
-  VERSION: "latest"
+  VERSION: ""
+  LATEST: true
 
 build:
   only:
@@ -10,7 +11,10 @@ build:
     key: $CI_PIPELINE_ID
     paths:
       - $CI_PROJECT_DIR/VERSION
-      - $CI_PROJECT_DIR/images.tar
+      - $CI_PROJECT_DIR/LATEST
+      - $CI_PROJECT_DIR/docker-hub.tar
+      - $CI_PROJECT_DIR/github-container-registry.tar
+      - $CI_PROJECT_DIR/gitlab-container-registry.tar
     policy: push
   script:
     - |
@@ -19,24 +23,113 @@ build:
       apk add curl
 
       echo "Checking for BYOND version..."
-      if [ "$VERSION" == "latest" ] || [ "$VERSION" == "" ]; then
-        curl https://secure.byond.com/download/version.txt -o VERSION
-      else
-        echo "$VERSION" > VERSION
+      if [ "$VERSION" != "latest" ] && [ "$VERSION" != "" ]; then
+        LATEST=false
       fi
 
-      echo "Building docker images..."
-      if [ "$VERSION" == "latest" ] || [ "$VERSION" == "" ]; then
-        docker build --build-arg BYOND_MAJOR=$(echo "$(cut -d'.' -f1 $CI_PROJECT_DIR/VERSION)") --build-arg BYOND_MINOR=$(echo "$(cut -d'.' -f2 $CI_PROJECT_DIR/VERSION)") -t douglasparker/byond:$(cat $CI_PROJECT_DIR/VERSION) -t douglasparker/byond:latest -t ghcr.io/douglasparker/byond:$(cat $CI_PROJECT_DIR/VERSION) -t ghcr.io/douglasparker/byond:latest -t registry.douglas-parker.com/douglasparker/byond:$(cat $CI_PROJECT_DIR/VERSION) -t registry.douglas-parker.com/douglasparker/byond:latest .
-      else
-        docker build --build-arg BYOND_MAJOR=$(echo "$(cut -d'.' -f1 $CI_PROJECT_DIR/VERSION)") --build-arg BYOND_MINOR=$(echo "$(cut -d'.' -f2 $CI_PROJECT_DIR/VERSION)") -t douglasparker/byond:$(cat $CI_PROJECT_DIR/VERSION) -t ghcr.io/douglasparker/byond:$(cat $CI_PROJECT_DIR/VERSION) -t registry.douglas-parker.com/douglasparker/byond:$(cat $CI_PROJECT_DIR/VERSION) .
+      if [ "$LATEST" == true ] || [ "$VERSION" == "latest" ] || [ "$VERSION" == "" ]; then
+        LATEST=true
+        VERSION=$(curl https://secure.byond.com/download/version.txt)
       fi
 
-      echo "Saveing docker images..."
-      if [ "$VERSION" == "latest" ] || [ "$VERSION" == "" ]; then
-        docker save --output $CI_PROJECT_DIR/images.tar douglasparker/byond:$(cat $CI_PROJECT_DIR/VERSION) douglasparker/byond:latest ghcr.io/douglasparker/byond:$(cat $CI_PROJECT_DIR/VERSION) ghcr.io/douglasparker/byond:latest registry.douglas-parker.com/douglasparker/byond:$(cat $CI_PROJECT_DIR/VERSION) registry.douglas-parker.com/douglasparker/byond:latest
+      echo "Saving variables for future jobs..."
+      echo "$VERSION" > VERSION
+      echo "$LATEST" > LATEST
+
+      echo "Logging into Docker Hub..."
+      docker login -u "$DOCKER_REGISTRY_USERNAME" -p "$DOCKER_REGISTRY_PASSWORD"
+
+      echo "Checking for an existing release on Docker Hub..."
+      docker manifest inspect douglasparker/byond:$VERSION
+      if [ $? == 1 ]; then
+
+        echo "Building releases for Docker Hub..."
+        if [ "$LATEST" == "true" ]; then
+          docker build --build-arg BYOND_MAJOR=$(echo "$(cut -d'.' -f1 $CI_PROJECT_DIR/VERSION)") --build-arg BYOND_MINOR=$(echo "$(cut -d'.' -f2 $CI_PROJECT_DIR/VERSION)") \
+            -t douglasparker/byond:latest \
+            -t douglasparker/byond:$VERSION \
+            .
+          
+          echo "Saving docker images for Docker Hub..."
+          docker save --output $CI_PROJECT_DIR/docker-hub.tar \
+            douglasparker/byond:latest \
+            douglasparker/byond:$VERSION
+        else
+          docker build --build-arg BYOND_MAJOR=$(echo "$(cut -d'.' -f1 $CI_PROJECT_DIR/VERSION)") --build-arg BYOND_MINOR=$(echo "$(cut -d'.' -f2 $CI_PROJECT_DIR/VERSION)") \
+            -t douglasparker/byond:$VERSION \
+            .
+          
+          echo "Saving docker images for Docker Hub..."
+          docker save --output $CI_PROJECT_DIR/docker-hub.tar \
+            douglasparker/byond:$VERSION
+        fi
+
       else
-        docker save --output $CI_PROJECT_DIR/images.tar douglasparker/byond:$(cat $CI_PROJECT_DIR/VERSION) ghcr.io/douglasparker/byond:$(cat $CI_PROJECT_DIR/VERSION) registry.douglas-parker.com/douglasparker/byond:$(cat $CI_PROJECT_DIR/VERSION)
+        echo "The docker image douglasparker/byond:$VERSION already exists on Docker Hub."
+      fi
+
+      echo "Logging into the GitHub Container Registry..."
+      docker login ghcr.io -u "$GH_CONTAINER_REGISTRY_USERNAME" -p "$GH_CONTAINER_REGISTRY_PASSWORD"
+
+      echo "Checking for an existing release on the GitHub Container Registry..."
+      docker manifest inspect ghcr.io/douglasparker/byond:$VERSION
+      if [ $? == 1 ]; then
+
+        echo "Building releases for the GitHub Container Registry..."
+        if [ "$LATEST" == "true" ]; then
+          docker build --build-arg BYOND_MAJOR=$(echo "$(cut -d'.' -f1 $CI_PROJECT_DIR/VERSION)") --build-arg BYOND_MINOR=$(echo "$(cut -d'.' -f2 $CI_PROJECT_DIR/VERSION)") \
+            -t ghcr.io/douglasparker/byond:latest \
+            -t ghcr.io/douglasparker/byond:$VERSION \
+            .
+          
+          echo "Saving docker images for the GitHub Container Registry..."
+          docker save --output $CI_PROJECT_DIR/github-container-registry.tar \
+            ghcr.io/douglasparker/byond:latest \
+            ghcr.io/douglasparker/byond:$VERSION
+        else
+          docker build --build-arg BYOND_MAJOR=$(echo "$(cut -d'.' -f1 $CI_PROJECT_DIR/VERSION)") --build-arg BYOND_MINOR=$(echo "$(cut -d'.' -f2 $CI_PROJECT_DIR/VERSION)") \
+            -t ghcr.io/douglasparker/byond:$VERSION \
+            .
+          
+          echo "Saving docker images for the GitHub Container Registry..."
+          docker save --output $CI_PROJECT_DIR/github-container-registry.tar \
+            ghcr.io/douglasparker/byond:$VERSION
+        fi
+
+      else
+        echo "The docker image ghcr.io/douglasparker/byond:$VERSION already exists on the GitHub Container Registry."
+      fi
+
+      echo "Logging into the GitLab Container Registry..."
+      docker login registry.douglas-parker.com -u "$GL_CONTAINER_REGISTRY_USERNAME" -p "$GL_CONTAINER_REGISTRY_PASSWORD"
+
+      echo "Checking for an existing release on the GitLab Container Registry..."
+      docker manifest inspect registry.douglas-parker.com/douglasparker/byond:$VERSION
+      if [ $? == 1 ]; then
+
+        echo "Building releases for the GitLab Container Registry..."
+        if [ "$LATEST" == "true" ]; then
+          docker build --build-arg BYOND_MAJOR=$(echo "$(cut -d'.' -f1 $CI_PROJECT_DIR/VERSION)") --build-arg BYOND_MINOR=$(echo "$(cut -d'.' -f2 $CI_PROJECT_DIR/VERSION)") \
+            -t registry.douglas-parker.com/douglasparker/byond:latest \
+            -t registry.douglas-parker.com/douglasparker/byond:$VERSION \
+            .
+          
+          echo "Saving docker images for the GitLab Container Registry..."
+          docker save --output $CI_PROJECT_DIR/gitlab-container-registry.tar \
+            registry.douglas-parker.com/douglasparker/byond:latest \
+            registry.douglas-parker.com/douglasparker/byond:$VERSION
+        else
+          docker build --build-arg BYOND_MAJOR=$(echo "$(cut -d'.' -f1 $CI_PROJECT_DIR/VERSION)") --build-arg BYOND_MINOR=$(echo "$(cut -d'.' -f2 $CI_PROJECT_DIR/VERSION)") \
+            -t registry.douglas-parker.com/douglasparker/byond:$(cat $CI_PROJECT_DIR/VERSION) \
+            .
+          
+          echo "Saving docker images for the GitLab Container Registry..."
+          docker save --output $CI_PROJECT_DIR/gitlab-container-registry.tar \
+            registry.douglas-parker.com/douglasparker/byond:$VERSION
+        fi
+
+      else
+        echo "The docker image registry.douglas-parker.com/douglasparker/byond:$VERSION already exists on the GitLab Container Registry."
       fi
 
 release:
@@ -47,19 +140,24 @@ release:
     key: $CI_PIPELINE_ID
     paths:
       - $CI_PROJECT_DIR/VERSION
-      - $CI_PROJECT_DIR/images.tar
+      - $CI_PROJECT_DIR/LATEST
+      - $CI_PROJECT_DIR/docker-hub.tar
+      - $CI_PROJECT_DIR/github-container-registry.tar
+      - $CI_PROJECT_DIR/gitlab-container-registry.tar
     policy: pull
   script:
     - |
+      # Disable exit on error (non-zero exit code) to ensure pipelines don't fail when `docker manifest inspect` returns 0
       echo "Disabling exit on error (non-zero exit code)..."
       set +e
+
+      echo "Restoring variables from previous job..."
+      VERSION=$(cat $CI_PROJECT_DIR/VERSION)
+      LATEST=$(cat $CI_PROJECT_DIR/LATEST)
 
       echo "Installing dependencies..."
       apk update
       apk add curl
-
-      echo "Loading docker images..."
-      docker load --input $CI_PROJECT_DIR/images.tar
 
       echo "Logging into Docker Hub..."
       docker login -u "$DOCKER_REGISTRY_USERNAME" -p "$DOCKER_REGISTRY_PASSWORD"
@@ -67,6 +165,11 @@ release:
       echo "Checking for an existing release on Docker Hub..."
       docker manifest inspect douglasparker/byond:$(cat $CI_PROJECT_DIR/VERSION)
       if [ $? == 1 ]; then
+
+        if [ -f "$CI_PROJECT_DIR/docker-hub.tar" ]; then
+          echo "Loading docker images for Docker Hub..."
+          docker load --input $CI_PROJECT_DIR/docker-hub.tar
+        fi
 
         echo "Publishing releases to Docker Hub..."
         if [ "$VERSION" == "latest" ] || [ "$VERSION" == "" ]; then
@@ -87,6 +190,11 @@ release:
       docker manifest inspect ghcr.io/douglasparker/byond:$(cat $CI_PROJECT_DIR/VERSION)
       if [ $? == 1 ]; then
 
+        if [ -f "$CI_PROJECT_DIR/github-container-registry.tar" ]; then
+          echo "Loading docker images for the GitHub Container Registry..."
+          docker load --input $CI_PROJECT_DIR/github-container-registry.tar
+        fi
+
         echo "Publishing releases to the GitHub Container Registry..."
         if [ "$VERSION" == "latest" ] || [ "$VERSION" == "" ]; then
           docker push ghcr.io/douglasparker/byond:$(cat $CI_PROJECT_DIR/VERSION)
@@ -105,6 +213,11 @@ release:
       echo "Checking for an existing release on the GitLab Container Registry..."
       docker manifest inspect registry.douglas-parker.com/douglasparker/byond:$(cat $CI_PROJECT_DIR/VERSION)
       if [ $? == 1 ]; then
+
+        if [ -f "$CI_PROJECT_DIR/gitlab-container-registry.tar" ]; then
+          echo "Loading docker images for the GitLab Container Registry..."
+          docker load --input $CI_PROJECT_DIR/gitlab-container-registry.tar
+        fi
 
         echo "Publishing releases to the GitLab Container Registry..."
         if [ "$VERSION" == "latest" ] || [ "$VERSION" == "" ]; then
