@@ -98,3 +98,22 @@ release:
       else
         echo "The docker image ghcr.io/douglasparker/byond:$(cat $CI_PROJECT_DIR/VERSION) already exists on the GitHub Container Registry."
       fi
+      
+      echo "Logging into the GitLab Container Registry..."
+      docker login registry.douglas-parker.com -u "$GL_CONTAINER_REGISTRY_USERNAME" -p "$GL_CONTAINER_REGISTRY_PASSWORD"
+
+      echo "Checking for an existing release on the GitLab Container Registry..."
+      docker manifest inspect registry.douglas-parker.com/douglasparker/byond:$(cat $CI_PROJECT_DIR/VERSION)
+      if [ $? == 1 ]; then
+
+        echo "Publishing releases to the GitLab Container Registry..."
+        if [ "$VERSION" == "latest" ] || [ "$VERSION" == "" ]; then
+          docker push registry.douglas-parker.com/douglasparker/byond:$(cat $CI_PROJECT_DIR/VERSION)
+          docker push registry.douglas-parker.com/douglasparker/byond:latest
+        else
+          docker push registry.douglas-parker.com/douglasparker/byond:$(cat $CI_PROJECT_DIR/VERSION)
+        fi
+
+      else
+        echo "The docker image registry.douglas-parker.com/douglasparker/byond:$(cat $CI_PROJECT_DIR/VERSION) already exists on the GitLab Container Registry."
+      fi
