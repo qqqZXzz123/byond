@@ -120,7 +120,7 @@ build:
             registry.douglas-parker.com/douglasparker/byond:$VERSION
         else
           docker build --build-arg BYOND_MAJOR=$(echo "$(cut -d'.' -f1 $CI_PROJECT_DIR/VERSION)") --build-arg BYOND_MINOR=$(echo "$(cut -d'.' -f2 $CI_PROJECT_DIR/VERSION)") \
-            -t registry.douglas-parker.com/douglasparker/byond:$(cat $CI_PROJECT_DIR/VERSION) \
+            -t registry.douglas-parker.com/douglasparker/byond:$VERSION \
             .
           
           echo "Saving docker images for the GitLab Container Registry..."
@@ -163,7 +163,7 @@ release:
       docker login -u "$DOCKER_REGISTRY_USERNAME" -p "$DOCKER_REGISTRY_PASSWORD"
 
       echo "Checking for an existing release on Docker Hub..."
-      docker manifest inspect douglasparker/byond:$(cat $CI_PROJECT_DIR/VERSION)
+      docker manifest inspect douglasparker/byond:$VERSION
       if [ $? == 1 ]; then
 
         if [ -f "$CI_PROJECT_DIR/docker-hub.tar" ]; then
@@ -173,21 +173,21 @@ release:
 
         echo "Publishing releases to Docker Hub..."
         if [ "$VERSION" == "latest" ] || [ "$VERSION" == "" ]; then
-          docker push douglasparker/byond:$(cat $CI_PROJECT_DIR/VERSION)
+          docker push douglasparker/byond:$VERSION
           docker push douglasparker/byond:latest
         else
-          docker push douglasparker/byond:$(cat $CI_PROJECT_DIR/VERSION)
+          docker push douglasparker/byond:$VERSION
         fi
 
       else
-        echo "The docker image douglasparker/byond:$(cat $CI_PROJECT_DIR/VERSION) already exists on Docker Hub."
+        echo "The docker image douglasparker/byond:$VERSION already exists on Docker Hub."
       fi
 
       echo "Logging into the GitHub Container Registry..."
       docker login ghcr.io -u "$GH_CONTAINER_REGISTRY_USERNAME" -p "$GH_CONTAINER_REGISTRY_PASSWORD"
 
       echo "Checking for an existing release on the GitHub Container Registry..."
-      docker manifest inspect ghcr.io/douglasparker/byond:$(cat $CI_PROJECT_DIR/VERSION)
+      docker manifest inspect ghcr.io/douglasparker/byond:$VERSION
       if [ $? == 1 ]; then
 
         if [ -f "$CI_PROJECT_DIR/github-container-registry.tar" ]; then
@@ -197,21 +197,21 @@ release:
 
         echo "Publishing releases to the GitHub Container Registry..."
         if [ "$VERSION" == "latest" ] || [ "$VERSION" == "" ]; then
-          docker push ghcr.io/douglasparker/byond:$(cat $CI_PROJECT_DIR/VERSION)
+          docker push ghcr.io/douglasparker/byond:$VERSION
           docker push ghcr.io/douglasparker/byond:latest
         else
-          docker push ghcr.io/douglasparker/byond:$(cat $CI_PROJECT_DIR/VERSION)
+          docker push ghcr.io/douglasparker/byond:$VERSION
         fi
 
       else
-        echo "The docker image ghcr.io/douglasparker/byond:$(cat $CI_PROJECT_DIR/VERSION) already exists on the GitHub Container Registry."
+        echo "The docker image ghcr.io/douglasparker/byond:$VERSION already exists on the GitHub Container Registry."
       fi
 
       echo "Logging into the GitLab Container Registry..."
       docker login registry.douglas-parker.com -u "$GL_CONTAINER_REGISTRY_USERNAME" -p "$GL_CONTAINER_REGISTRY_PASSWORD"
 
       echo "Checking for an existing release on the GitLab Container Registry..."
-      docker manifest inspect registry.douglas-parker.com/douglasparker/byond:$(cat $CI_PROJECT_DIR/VERSION)
+      docker manifest inspect registry.douglas-parker.com/douglasparker/byond:$VERSION
       if [ $? == 1 ]; then
 
         if [ -f "$CI_PROJECT_DIR/gitlab-container-registry.tar" ]; then
@@ -221,12 +221,12 @@ release:
 
         echo "Publishing releases to the GitLab Container Registry..."
         if [ "$VERSION" == "latest" ] || [ "$VERSION" == "" ]; then
-          docker push registry.douglas-parker.com/douglasparker/byond:$(cat $CI_PROJECT_DIR/VERSION)
+          docker push registry.douglas-parker.com/douglasparker/byond:$VERSION
           docker push registry.douglas-parker.com/douglasparker/byond:latest
         else
-          docker push registry.douglas-parker.com/douglasparker/byond:$(cat $CI_PROJECT_DIR/VERSION)
+          docker push registry.douglas-parker.com/douglasparker/byond:$VERSION
         fi
 
       else
-        echo "The docker image registry.douglas-parker.com/douglasparker/byond:$(cat $CI_PROJECT_DIR/VERSION) already exists on the GitLab Container Registry."
+        echo "The docker image registry.douglas-parker.com/douglasparker/byond:$VERSION already exists on the GitLab Container Registry."
       fi
