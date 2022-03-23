@@ -172,7 +172,7 @@ release:
         fi
 
         echo "Publishing releases to Docker Hub..."
-        if [ "$VERSION" == "latest" ] || [ "$VERSION" == "" ]; then
+        if [ "$LATEST" == "true" ]; then
           docker push douglasparker/byond:$VERSION
           docker push douglasparker/byond:latest
         else
@@ -196,7 +196,7 @@ release:
         fi
 
         echo "Publishing releases to the GitHub Container Registry..."
-        if [ "$VERSION" == "latest" ] || [ "$VERSION" == "" ]; then
+        if [ "$LATEST" == "true" ]; then
           docker push ghcr.io/douglasparker/byond:$VERSION
           docker push ghcr.io/douglasparker/byond:latest
         else
@@ -220,7 +220,7 @@ release:
         fi
 
         echo "Publishing releases to the GitLab Container Registry..."
-        if [ "$VERSION" == "latest" ] || [ "$VERSION" == "" ]; then
+        if [ "$LATEST" == "true" ]; then
           docker push registry.douglas-parker.com/douglasparker/byond:$VERSION
           docker push registry.douglas-parker.com/douglasparker/byond:latest
         else
