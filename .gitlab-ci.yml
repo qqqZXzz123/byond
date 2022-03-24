@@ -19,6 +19,10 @@ build:
     policy: push
   script:
     - |
+      # Disable exit on error (non-zero exit code) to ensure pipelines don't fail when `docker manifest inspect` returns 0
+      echo "Disabling exit on error (non-zero exit code)..."
+      set +e
+
       echo "Installing dependencies..."
       apk update
       apk add curl
