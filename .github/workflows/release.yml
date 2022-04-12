@@ -27,19 +27,19 @@ jobs:
         run: |
           if [ "${{ github.event.inputs.version }}" == "latest" ] || [ "${{ github.event.inputs.version }}" == "" ]; then
             curl https://secure.byond.com/download/version.txt -o VERSION
-            $LATEST=1
+            echo "LATEST=1" >> $GITHUB_ENV
           else
             echo "${{ github.event.inputs.version }}" > VERSION
           fi
 
-          $VERSION="$(cat ${{ github.workspace }}/VERSION)"
+          echo "VERSION=$(cat ${{ github.workspace }}/VERSION)" >> $GITHUB_ENV
       
       - name: Check for Docker Hub release
         run: |
           docker login -u "${{ secrets.DOCKER_REGISTRY_USERNAME }}" -p "${{ secrets.DOCKER_REGISTRY_PASSWORD }}"
           docker manifest inspect douglasparker/byond:$VERSION
           if [ $? == 0 ]; then
-            $DOCKER_RELEASE_MANIFEST=1
+            echo "DOCKER_RELEASE_MANIFEST=1" >> $GITHUB_ENV
           fi
 
       - name: Build Docker images for Docker Hub
@@ -73,7 +73,7 @@ jobs:
           docker login ghcr.io -u "${{ secrets.GH_CONTAINER_REGISTRY_USERNAME }}" -p "${{ secrets.GH_CONTAINER_REGISTRY_PASSWORD }}"
           docker manifest inspect douglasparker/byond:$VERSION
           if [ $? == 0 ]; then
-            $GHCR_RELEASE_MANIFEST=1
+            echo "GHCR_RELEASE_MANIFEST=1" >> $GITHUB_ENV
           fi
       
       - name: Build Docker images for GitHub Container Registry
