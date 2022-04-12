@@ -126,7 +126,7 @@ jobs:
         id: cache
         with:
           path: |
-            ${{ github.workspace }}github-env
+            ${{ github.workspace }}/github-env
             ${{ github.workspace }}/VERSION
             ${{ github.workspace }}/docker.tar
             ${{ github.workspace }}/ghcr.tar
