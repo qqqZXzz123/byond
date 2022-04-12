@@ -101,17 +101,12 @@ jobs:
             docker save --output ${{ github.workspace }}/docker.tar \
               ghcr.io/douglasparker/byond:$VERSION
           fi
-      
-      - name: Save environmental variables
-        run: |
-          cat $GITHUB_ENV > ${{ github.workspace }}/github-env
 
       - name: Cache build artifacts
         uses: actions/cache@v2
         id: cache
         with:
           path: |
-            ${{ github.workspace }}/github-env
             ${{ github.workspace }}/VERSION
             ${{ github.workspace }}/docker.tar
             ${{ github.workspace }}/ghcr.tar
@@ -126,15 +121,21 @@ jobs:
         id: cache
         with:
           path: |
-            ${{ github.workspace }}/github-env
             ${{ github.workspace }}/VERSION
             ${{ github.workspace }}/docker.tar
             ${{ github.workspace }}/ghcr.tar
           key: ${{ github.run_id }}
       
-      - name: Load environmental variables
+      - name: Check for BYOND version
         run: |
-          cat ${{ github.workspace }}/github-env >> $GITHUB_ENV
+          if [ "${{ github.event.inputs.version }}" == "latest" ] || [ "${{ github.event.inputs.version }}" == "" ]; then
+            curl https://secure.byond.com/download/version.txt -o VERSION
+            echo "LATEST=1" >> $GITHUB_ENV
+          else
+            echo "${{ github.event.inputs.version }}" > VERSION
+          fi
+
+          echo "VERSION=$(cat ${{ github.workspace }}/VERSION)" >> $GITHUB_ENV
       
       - name: Check for Docker Hub release
         run: |
