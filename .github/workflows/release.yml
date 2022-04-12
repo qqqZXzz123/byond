@@ -126,6 +126,14 @@ jobs:
             ${{ github.workspace }}/ghcr.tar
           key: ${{ github.run_id }}
       
+      - name: Check for Docker Hub release
+        run: |
+          docker login -u "${{ secrets.DOCKER_REGISTRY_USERNAME }}" -p "${{ secrets.DOCKER_REGISTRY_PASSWORD }}"
+          docker manifest inspect douglasparker/byond:$VERSION
+          if [ $? == 0 ]; then
+            echo "DOCKER_RELEASE_MANIFEST=1" >> $GITHUB_ENV
+          fi
+      
       - name: Load Docker images for Docker Hub
         if: ${{ env.DOCKER_RELEASE_MANIFEST == 0 }}
         run: |
@@ -141,6 +149,14 @@ jobs:
             docker push douglasparker/byond:latest
           else
             docker push douglasparker/byond:$VERSION
+          fi
+      
+      - name: Check for GitHub Container Registry release
+        run: |
+          docker login ghcr.io -u "${{ secrets.GH_CONTAINER_REGISTRY_USERNAME }}" -p "${{ secrets.GH_CONTAINER_REGISTRY_PASSWORD }}"
+          docker manifest inspect douglasparker/byond:$VERSION
+          if [ $? == 0 ]; then
+            echo "GHCR_RELEASE_MANIFEST=1" >> $GITHUB_ENV
           fi
       
       - name: Load Docker images for GitHub Container Registry
