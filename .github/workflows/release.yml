@@ -37,10 +37,13 @@ jobs:
       - name: Check for Docker Hub release
         run: |
           docker login -u "${{ secrets.DOCKER_REGISTRY_USERNAME }}" -p "${{ secrets.DOCKER_REGISTRY_PASSWORD }}"
+
+          set +e
           docker manifest inspect douglasparker/byond:$VERSION
           if [ $? == 0 ]; then
             echo "DOCKER_RELEASE_MANIFEST=1" >> $GITHUB_ENV
           fi
+          set -e
 
       - name: Build Docker images for Docker Hub
         if: ${{ env.DOCKER_RELEASE_MANIFEST == 0 }}
@@ -71,10 +74,13 @@ jobs:
       - name: Check for GitHub Container Registry release
         run: |
           docker login ghcr.io -u "${{ secrets.GH_CONTAINER_REGISTRY_USERNAME }}" -p "${{ secrets.GH_CONTAINER_REGISTRY_PASSWORD }}"
+
+          set +e
           docker manifest inspect douglasparker/byond:$VERSION
           if [ $? == 0 ]; then
             echo "GHCR_RELEASE_MANIFEST=1" >> $GITHUB_ENV
           fi
+          set -e
       
       - name: Build Docker images for GitHub Container Registry
         if: ${{ env.GHCR_RELEASE_MANIFEST == 0 }}
@@ -140,10 +146,13 @@ jobs:
       - name: Check for Docker Hub release
         run: |
           docker login -u "${{ secrets.DOCKER_REGISTRY_USERNAME }}" -p "${{ secrets.DOCKER_REGISTRY_PASSWORD }}"
+
+          set +e
           docker manifest inspect douglasparker/byond:$VERSION
           if [ $? == 0 ]; then
             echo "DOCKER_RELEASE_MANIFEST=1" >> $GITHUB_ENV
           fi
+          set -e
       
       - name: Load Docker images for Docker Hub
         if: ${{ env.DOCKER_RELEASE_MANIFEST == 0 }}
@@ -165,10 +174,13 @@ jobs:
       - name: Check for GitHub Container Registry release
         run: |
           docker login ghcr.io -u "${{ secrets.GH_CONTAINER_REGISTRY_USERNAME }}" -p "${{ secrets.GH_CONTAINER_REGISTRY_PASSWORD }}"
+
+          set +e
           docker manifest inspect douglasparker/byond:$VERSION
           if [ $? == 0 ]; then
             echo "GHCR_RELEASE_MANIFEST=1" >> $GITHUB_ENV
           fi
+          set -e
       
       - name: Load Docker images for GitHub Container Registry
         if: ${{ env.GHCR_RELEASE_MANIFEST == 0 }}
