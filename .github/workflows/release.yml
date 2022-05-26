@@ -100,11 +100,11 @@ jobs:
         if: ${{ env.GHCR_RELEASE_MANIFEST == 0 }}
         run: |
           if [ "$LATEST" == 1 ]; then
-            docker save --output ${{ github.workspace }}/docker.tar \
+            docker save --output ${{ github.workspace }}/ghcr.tar \
               ghcr.io/douglasparker/byond:latest \
               ghcr.io/douglasparker/byond:$VERSION
           else
-            docker save --output ${{ github.workspace }}/docker.tar \
+            docker save --output ${{ github.workspace }}/ghcr.tar \
               ghcr.io/douglasparker/byond:$VERSION
           fi
 
