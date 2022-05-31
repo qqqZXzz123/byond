@@ -3,198 +3,46 @@ name: Release
 on:
   schedule:
     - cron: "0 * * * *"
+
   workflow_dispatch:
-    inputs:
-      version:
-        required: true
-        default: latest
-        description: "BYOND Version"
 
 env:
-  VERSION: ""
-  LATEST: 0
-  DOCKER_RELEASE_MANIFEST: 0
-  GHCR_RELEASE_MANIFEST: 0
+  BYOND_VERSION: ""
+  BYOND_MAJOR_VERSION: ""
+  BYOND_MINOR_VERSION: ""
+  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  Build:
+  release:
+    name: Release
     runs-on: ubuntu-20.04
     steps:
-      - name: Checkout repository
+      - name: Checkout the repository
         uses: actions/checkout@v3
-      
+
       - name: Check for BYOND version
         run: |
-          if [ "${{ github.event.inputs.version }}" == "latest" ] || [ "${{ github.event.inputs.version }}" == "" ]; then
-            curl https://secure.byond.com/download/version.txt -o VERSION
-            echo "LATEST=1" >> $GITHUB_ENV
-          else
-            echo "${{ github.event.inputs.version }}" > VERSION
-          fi
-
-          echo "VERSION=$(cat ${{ github.workspace }}/VERSION)" >> $GITHUB_ENV
+          curl https://secure.byond.com/download/version.txt -o BYOND_VERSION
+          echo "BYOND_VERSION=$(cat BYOND_VERSION)" >> $GITHUB_ENV
+          echo "BYOND_MAJOR_VERSION=$(echo "$(cut -d'.' -f1 ${{ github.workspace }}/BYOND_VERSION)")" >> $GITHUB_ENV
+          echo "BYOND_MINOR_VERSION=$(echo "$(cut -d'.' -f2 ${{ github.workspace }}/BYOND_VERSION)")" >> $GITHUB_ENV
       
-      - name: Check for Docker Hub release
-        run: |
-          docker login -u "${{ secrets.DOCKER_REGISTRY_USERNAME }}" -p "${{ secrets.DOCKER_REGISTRY_PASSWORD }}"
-
-          set +e
-          docker manifest inspect douglasparker/byond:$VERSION
-          if [ $? == 0 ]; then
-            echo "DOCKER_RELEASE_MANIFEST=1" >> $GITHUB_ENV
-          fi
-          set -e
-
-      - name: Build Docker images for Docker Hub
-        if: ${{ env.DOCKER_RELEASE_MANIFEST == 0 }}
-        run: |
-          if [ "$LATEST" == 1 ]; then
-            docker build --build-arg BYOND_MAJOR=$(echo "$(cut -d'.' -f1 ${{ github.workspace }}/VERSION)") --build-arg BYOND_MINOR=$(echo "$(cut -d'.' -f2 ${{ github.workspace }}/VERSION)") \
-              -t douglasparker/byond:latest \
-              -t douglasparker/byond:$VERSION \
-              .
-          else
-            docker build --build-arg BYOND_MAJOR=$(echo "$(cut -d'.' -f1 ${{ github.workspace }}/VERSION)") --build-arg BYOND_MINOR=$(echo "$(cut -d'.' -f2 ${{ github.workspace }}/VERSION)") \
-              -t douglasparker/byond:$VERSION \
-              .
-          fi
-      
-      - name: Save Docker images for Docker Hub
-        if: ${{ env.DOCKER_RELEASE_MANIFEST == 0 }}
-        run: |
-          if [ "$LATEST" == 1 ]; then
-            docker save --output ${{ github.workspace }}/docker.tar \
-              douglasparker/byond:latest \
-              douglasparker/byond:$VERSION
-          else
-            docker save --output ${{ github.workspace }}/docker.tar \
-              douglasparker/byond:$VERSION
-          fi
-      
-      - name: Check for GitHub Container Registry release
-        run: |
-          docker login ghcr.io -u "${{ secrets.GH_CONTAINER_REGISTRY_USERNAME }}" -p "${{ secrets.GH_CONTAINER_REGISTRY_PASSWORD }}"
-
-          set +e
-          docker manifest inspect douglasparker/byond:$VERSION
-          if [ $? == 0 ]; then
-            echo "GHCR_RELEASE_MANIFEST=1" >> $GITHUB_ENV
-          fi
-          set -e
-      
-      - name: Build Docker images for GitHub Container Registry
-        if: ${{ env.GHCR_RELEASE_MANIFEST == 0 }}
-        run: |
-          if [ "$LATEST" == 1 ]; then
-            docker build --build-arg BYOND_MAJOR=$(echo "$(cut -d'.' -f1 ${{ github.workspace }}/VERSION)") --build-arg BYOND_MINOR=$(echo "$(cut -d'.' -f2 ${{ github.workspace }}/VERSION)") \
-              -t ghcr.io/douglasparker/byond:latest \
-              -t ghcr.io/douglasparker/byond:$VERSION \
-              .
-          else
-            docker build --build-arg BYOND_MAJOR=$(echo "$(cut -d'.' -f1 ${{ github.workspace }}/VERSION)") --build-arg BYOND_MINOR=$(echo "$(cut -d'.' -f2 ${{ github.workspace }}/VERSION)") \
-              -t ghcr.io/douglasparker/byond:$VERSION \
-              .
-          fi
-      
-      - name: Save Docker images for GitHub Container Registry
-        if: ${{ env.GHCR_RELEASE_MANIFEST == 0 }}
-        run: |
-          if [ "$LATEST" == 1 ]; then
-            docker save --output ${{ github.workspace }}/ghcr.tar \
-              ghcr.io/douglasparker/byond:latest \
-              ghcr.io/douglasparker/byond:$VERSION
-          else
-            docker save --output ${{ github.workspace }}/ghcr.tar \
-              ghcr.io/douglasparker/byond:$VERSION
-          fi
-
-      - name: Cache build artifacts
-        uses: actions/cache@v3
-        id: cache
+      - name: Login to the Docker Hub Registry
+        uses: docker/login-action@v2
         with:
-          path: |
-            ${{ github.workspace }}/VERSION
-            ${{ github.workspace }}/docker.tar
-            ${{ github.workspace }}/ghcr.tar
-          key: ${{ github.run_id }}
-  
-  Release:
-    runs-on: ubuntu-20.04
-    needs: [Build]
-    steps:
-      - name: Restore cached build artifacts
-        uses: actions/cache@v3
-        id: cache
+          username: ${{ github.actor }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Login to the GitHub Container Registry
+        uses: docker/login-action@v2
         with:
-          path: |
-            ${{ github.workspace }}/VERSION
-            ${{ github.workspace }}/docker.tar
-            ${{ github.workspace }}/ghcr.tar
-          key: ${{ github.run_id }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       
-      - name: Check for BYOND version
-        run: |
-          if [ "${{ github.event.inputs.version }}" == "latest" ] || [ "${{ github.event.inputs.version }}" == "" ]; then
-            curl https://secure.byond.com/download/version.txt -o VERSION
-            echo "LATEST=1" >> $GITHUB_ENV
-          else
-            echo "${{ github.event.inputs.version }}" > VERSION
-          fi
-
-          echo "VERSION=$(cat ${{ github.workspace }}/VERSION)" >> $GITHUB_ENV
-      
-      - name: Check for Docker Hub release
-        run: |
-          docker login -u "${{ secrets.DOCKER_REGISTRY_USERNAME }}" -p "${{ secrets.DOCKER_REGISTRY_PASSWORD }}"
-
-          set +e
-          docker manifest inspect douglasparker/byond:$VERSION
-          if [ $? == 0 ]; then
-            echo "DOCKER_RELEASE_MANIFEST=1" >> $GITHUB_ENV
-          fi
-          set -e
-      
-      - name: Load Docker images for Docker Hub
-        if: ${{ env.DOCKER_RELEASE_MANIFEST == 0 }}
-        run: |
-          docker load --input ${{ github.workspace }}/docker.tar
-      
-      - name: Publish release to Docker Hub
-        if: ${{ env.DOCKER_RELEASE_MANIFEST == 0 }}
-        run: |
-          docker login -u "${{ secrets.DOCKER_REGISTRY_USERNAME }}" -p "${{ secrets.DOCKER_REGISTRY_PASSWORD }}"
-
-          if [ "$LATEST" == 1 ]; then
-            docker push douglasparker/byond:$VERSION
-            docker push douglasparker/byond:latest
-          else
-            docker push douglasparker/byond:$VERSION
-          fi
-      
-      - name: Check for GitHub Container Registry release
-        run: |
-          docker login ghcr.io -u "${{ secrets.GH_CONTAINER_REGISTRY_USERNAME }}" -p "${{ secrets.GH_CONTAINER_REGISTRY_PASSWORD }}"
-
-          set +e
-          docker manifest inspect douglasparker/byond:$VERSION
-          if [ $? == 0 ]; then
-            echo "GHCR_RELEASE_MANIFEST=1" >> $GITHUB_ENV
-          fi
-          set -e
-      
-      - name: Load Docker images for GitHub Container Registry
-        if: ${{ env.GHCR_RELEASE_MANIFEST == 0 }}
-        run: |
-          docker load --input ${{ github.workspace }}/ghcr.tar
-      
-      - name: Publish release to GitHub Container Registry
-        if: ${{ env.GHCR_RELEASE_MANIFEST == 0 }}
-        run: |
-          docker login -u "${{ secrets.DOCKER_REGISTRY_USERNAME }}" -p "${{ secrets.DOCKER_REGISTRY_PASSWORD }}"
-
-          if [ "$LATEST" == 1 ]; then
-            docker push ghcr.io/douglasparker/byond:$VERSION
-            docker push ghcr.io/douglasparker/byond:latest
-          else
-            docker push ghcr.io/douglasparker/byond:$VERSION
-          fi
+      - name: Build the Docker image and publish to the Docker Registry
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          push: true
+          tags: $IMAGE_NAME:latest,$IMAGE_NAME:$BYOND_MAJOR_VERSION,$IMAGE_NAME:$BYOND_VERSION
