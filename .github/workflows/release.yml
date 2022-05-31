@@ -45,7 +45,13 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ env.IMAGE_NAME }}:latest,${{ env.IMAGE_NAME }}:${{ env.BYOND_MAJOR_VERSION }},${{ env.IMAGE_NAME }}:${{ env.BYOND_VERSION }}
           build-args: |
             BYOND_MAJOR=${{ env.BYOND_MAJOR_VERSION }}
             BYOND_MINOR=${{ env.BYOND_MINOR_VERSION }}
+          tags: |
+            ${{ env.IMAGE_NAME }}:latest
+            ${{ env.IMAGE_NAME }}:${{ env.BYOND_MAJOR_VERSION }}
+            ${{ env.IMAGE_NAME }}:${{ env.BYOND_VERSION }}
+            ghcr.io/${{ env.IMAGE_NAME }}:latest
+            ghcr.io/${{ env.IMAGE_NAME }}:${{ env.BYOND_MAJOR_VERSION }}
+            ghcr.io/${{ env.IMAGE_NAME }}:${{ env.BYOND_VERSION }}
