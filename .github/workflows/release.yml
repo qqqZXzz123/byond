@@ -55,3 +55,9 @@ jobs:
             ghcr.io/${{ env.IMAGE_NAME }}:latest
             ghcr.io/${{ env.IMAGE_NAME }}:${{ env.BYOND_MAJOR_VERSION }}
             ghcr.io/${{ env.IMAGE_NAME }}:${{ env.BYOND_VERSION }}
+
+      - name: Update Docker Hub Description
+        uses: peter-evans/dockerhub-description@v3
+        with:
+          username: ${{ github.actor }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
