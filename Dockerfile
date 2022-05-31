@@ -10,7 +10,6 @@ RUN apt-get update && \
     curl "http://www.byond.com/download/build/${BYOND_MAJOR}/${BYOND_MAJOR}.${BYOND_MINOR}_byond_linux.zip" -o byond.zip && \
     unzip byond.zip && \
     cd byond && \
-    sed -i 's|install:|&\n\tmkdir -p $(MAN_DIR)/man6|' Makefile && \
     make install && \
     apt-get purge -y --auto-remove curl unzip make && \
     cd .. && \
