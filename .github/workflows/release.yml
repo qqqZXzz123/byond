@@ -48,7 +48,7 @@ jobs:
       
       - name: Build the Docker image and publish to the Docker Registry
         uses: docker/build-push-action@v3
-        if: steps.docker_check.outcome != 'success'
+        if: steps.docker_check.outcome == 'success'
         with:
           context: .
           push: true
