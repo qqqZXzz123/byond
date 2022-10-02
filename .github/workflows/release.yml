@@ -20,7 +20,7 @@ jobs:
       - name: Checkout the repository
         uses: actions/checkout@v3
 
-      - name: Check for BYOND version
+      - name: Check for the latest BYOND version
         run: |
           curl https://secure.byond.com/download/version.txt -o BYOND_VERSION
           echo "BYOND_VERSION=$(cat BYOND_VERSION)" >> $GITHUB_ENV
@@ -40,8 +40,15 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       
+      - name: Check if this release was already published to the Docker Registry
+        id: docker_check
+        run: |
+          docker manifest inpsect douglasparker/byond:${{ env.BYOND_VERSION }}
+          echo "::set-output name=tag_exists::$?"
+      
       - name: Build the Docker image and publish to the Docker Registry
         uses: docker/build-push-action@v3
+        if: steps.docker_check.outputs.tag_exists == 0
         with:
           context: .
           push: true
