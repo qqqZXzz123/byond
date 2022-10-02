@@ -42,6 +42,7 @@ jobs:
       
       - name: Check if this release was already published to the Docker Registry
         id: docker_check
+        continue-on-error: true
         run: |
           docker manifest inpsect douglasparker/byond:${{ env.BYOND_VERSION }}
           echo "::set-output name=tag_exists::$?"
