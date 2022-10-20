@@ -77,8 +77,6 @@ publish:
   only:
     - schedules
     - triggers
-  rules:
-    - if: $DOCKER_MANIFEST_EXISTS == 0
   cache:
     key: $CI_PIPELINE_ID
     policy: pull
