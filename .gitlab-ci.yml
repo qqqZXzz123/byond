@@ -5,6 +5,7 @@ variables:
   BYOND_MAJOR_VERSION: ""
   BYOND_MINOR_VERSION: ""
   IMAGE_NAME: $CI_PROJECT_PATH
+  DOCKER_MANIFEST_EXISTS: 0
 
 build:
   only:
@@ -48,7 +49,8 @@ build:
       set -e
       if [ $? -eq 0 ]; then
         echo "An existing tag was found!"
-        exit 0
+        DOCKER_MANIFEST_EXISTS=1
+        echo "DOCKER_MANIFEST_EXISTS=$DOCKER_MANIFEST_EXISTS" >> build.env
       fi
 
       echo "Building the Docker images..."
@@ -75,6 +77,8 @@ publish:
   only:
     - schedules
     - triggers
+  rules:
+    - if: $DOCKER_MANIFEST_EXISTS == 0
   cache:
     key: $CI_PIPELINE_ID
     policy: pull
