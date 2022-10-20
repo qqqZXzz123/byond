@@ -21,7 +21,7 @@ build:
   before_script:
     - |
       apt-get update
-      apt-get install curl -y
+      apt-get install curl docker -y
   script:
     - |
       echo "Checking for the latest BYOND version..."
