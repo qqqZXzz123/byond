@@ -1,4 +1,4 @@
-image: ubuntu:22.04
+image: docker:latest
 
 variables:
   BYOND_VERSION: ""
@@ -20,8 +20,8 @@ build:
       - $CI_PROJECT_DIR/docker.tar
   before_script:
     - |
-      apt-get update
-      apt-get install curl docker -y
+      apk update
+      apk add curl
   script:
     - |
       echo "Checking for the latest BYOND version..."
