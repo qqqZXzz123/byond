@@ -6,6 +6,9 @@ variables:
   BYOND_MINOR_VERSION: ""
   IMAGE_NAME: $CI_PROJECT_PATH
 
+stages:
+  - build
+
 build:
   stage: build
   only:
@@ -94,4 +97,3 @@ publish:
 
       echo "Publishing the Docker images to the GitLab Container Registry..."
       docker push --all-tags $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME
-
