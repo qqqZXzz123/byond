@@ -75,7 +75,7 @@ build:
 publish:
   needs: ["build"]
   rules:
-    - if: $DOCKER_MANIFEST_EXISTS == 0
+    - if: $DOCKER_MANIFEST_EXISTS == "0"
   cache:
     key: $CI_PIPELINE_ID
     policy: pull
