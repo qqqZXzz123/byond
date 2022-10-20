@@ -74,8 +74,11 @@ build:
 
 publish:
   needs: ["build"]
+  only:
+    - schedules
+    - triggers
   rules:
-    - if: $DOCKER_MANIFEST_EXISTS == "0"
+    - if: $DOCKER_MANIFEST_EXISTS == 0
   cache:
     key: $CI_PIPELINE_ID
     policy: pull
@@ -83,18 +86,23 @@ publish:
       - $CI_PROJECT_DIR/docker.tar
   script:
     - |
-      echo "Logging into the DockerHub Registry..."
-      docker login --username $DOCKER_USERNAME --password $DOCKER_TOKEN
+      if [ $DOCKER_MANIFEST_EXISTS -eq 0 ]; then
+        echo "Logging into the DockerHub Registry..."
+        docker login --username $DOCKER_USERNAME --password $DOCKER_TOKEN
 
-      echo "Logging into the GitLab Container Registry..."
-      docker login $CI_REGISTRY --username $CI_REGISTRY_USER --password $CI_REGISTRY_PASSWORD
+        echo "Logging into the GitLab Container Registry..."
+        docker login $CI_REGISTRY --username $CI_REGISTRY_USER --password $CI_REGISTRY_PASSWORD
 
-      echo "Loading the Docker images..."
-      docker load --input $CI_PROJECT_DIR/docker.tar
+        echo "Loading the Docker images..."
+        docker load --input $CI_PROJECT_DIR/docker.tar
 
-      echo "Publishing the Docker images to the Docker Registry..."
-      docker push --all-tags $CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME
+        echo "Publishing the Docker images to the Docker Registry..."
+        docker push --all-tags $CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME
 
-      echo "Publishing the Docker images to the GitLab Container Registry..."
-      docker push --all-tags $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME
+        echo "Publishing the Docker images to the GitLab Container Registry..."
+        docker push --all-tags $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME
+      else
+        echo "This docker image already exists in the Docker Registry..."
+        echo "The publish job has been skipped."
+      fi
 
