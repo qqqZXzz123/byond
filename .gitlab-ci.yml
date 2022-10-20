@@ -43,7 +43,6 @@ build:
       echo "Checking if this release was already published to the DockerHub Registry..."
       # Disable exit on error (non-zero exit code) to ensure pipelines don't fail when `docker manifest inspect` returns 0
       echo "Disabling exit on error (non-zero exit code)..."
-      echo "DEBUG::$CI_REGISTRY::$CI_REGISTRY_IMAGE::$CI_PROJECT_NAMESPACE::$CI_PROJECT_NAME"
       set +e
       docker manifest inspect douglasparker/byond:$BYOND_VERSION
       echo "Enabling exit on error (non-zero exit code)..."
@@ -59,9 +58,9 @@ build:
         -t $CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:latest \
         -t $CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$BYOND_VERSION \
         -t $CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$BYOND_MAJOR_VERSION \
-        -t $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:latest \
-        -t $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$BYOND_VERSION \
-        -t $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$BYOND_MAJOR_VERSION \
+        -t $CI_REGISTRY_IMAGE:latest \
+        -t $CI_REGISTRY_IMAGE:$BYOND_VERSION \
+        -t $CI_REGISTRY_IMAGE:$BYOND_MAJOR_VERSION \
         .
       
       echo "Saving the Docker images..."
@@ -69,9 +68,9 @@ build:
         $CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:latest \
         $CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$BYOND_VERSION \
         $CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$BYOND_MAJOR_VERSION \
-        $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:latest \
-        $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$BYOND_VERSION \
-        $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$BYOND_MAJOR_VERSION
+        $CI_REGISTRY_IMAGE:latest \
+        $CI_REGISTRY_IMAGE:$BYOND_VERSION \
+        $CI_REGISTRY_IMAGE:$BYOND_MAJOR_VERSION
 
 publish:
   stage: build
@@ -100,7 +99,7 @@ publish:
         docker push --all-tags $CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME
 
         echo "Publishing the Docker images to the GitLab Container Registry..."
-        docker push --all-tags $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME
+        docker push --all-tags $CI_REGISTRY_IMAGE
       else
         echo "This docker image already exists in the Docker Registry..."
         echo "The publish job has been skipped."
