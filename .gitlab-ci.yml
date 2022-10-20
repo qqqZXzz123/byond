@@ -74,9 +74,6 @@ build:
 
 publish:
   needs: ["build"]
-  only:
-    - schedules
-    - triggers
   rules:
     - if: $DOCKER_MANIFEST_EXISTS == 0
   cache:
