@@ -19,7 +19,9 @@ build:
     paths:
       - $CI_PROJECT_DIR/docker.tar
   before_script:
-    - apt-get install curl -y
+    - |
+      apt-get update
+      apt-get install curl -y
   script:
     - |
       echo "Checking for the latest BYOND version..."
