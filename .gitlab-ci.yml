@@ -4,7 +4,7 @@ variables:
   BYOND_VERSION: ""
   BYOND_MAJOR_VERSION: ""
   BYOND_MINOR_VERSION: ""
-  IMAGE_NAME: $CI_PROJECT_PATH
+  IMAGE_NAME: "$CI_PROJECT_PATH"
   DOCKER_MANIFEST_EXISTS: 0
 
 build:
@@ -16,10 +16,10 @@ build:
     reports:
       dotenv: build.env
   cache:
-    key: $CI_PIPELINE_ID
+    key: "$CI_PIPELINE_ID"
     policy: push
     paths:
-      - $CI_PROJECT_DIR/docker.tar
+      - "$CI_PROJECT_DIR/docker.tar"
   before_script:
     - |
       apk update
@@ -28,23 +28,23 @@ build:
     - |
       echo "Checking for the latest BYOND version..."
       BYOND_VERSION=$(curl https://secure.byond.com/download/version.txt)
-      BYOND_MAJOR_VERSION=$(echo "$(cut -d '.' -f 1 <(echo $BYOND_VERSION))")
-      BYOND_MINOR_VERSION=$(echo "$(cut -d '.' -f 2 <(echo $BYOND_VERSION))")
+      BYOND_MAJOR_VERSION="$(echo "$(cut -d '.' -f 1 <(echo "$BYOND_VERSION"))")"
+      BYOND_MINOR_VERSION="$(echo "$(cut -d '.' -f 2 <(echo "$BYOND_VERSION"))")"
       echo "BYOND_VERSION=$BYOND_VERSION" >> build.env
       echo "BYOND_MAJOR_VERSION=$BYOND_MAJOR_VERSION" >> build.env
       echo "BYOND_MINOR_VERSION=$BYOND_MINOR_VERSION" >> build.env
 
       echo "Logging into the DockerHub Registry..."
-      docker login --username $DOCKER_USERNAME --password $DOCKER_TOKEN
+      docker login --username "$DOCKER_USERNAME" --password "$DOCKER_TOKEN"
 
       echo "Logging into the GitLab Container Registry..."
-      docker login $CI_REGISTRY --username $CI_REGISTRY_USER --password $CI_REGISTRY_PASSWORD
+      docker login "$CI_REGISTRY" --username "$CI_REGISTRY_USER" --password "$CI_REGISTRY_PASSWORD"
 
       echo "Checking if this release was already published to the DockerHub Registry..."
       # Disable exit on error (non-zero exit code) to ensure pipelines don't fail when `docker manifest inspect` returns 0
       echo "Disabling exit on error (non-zero exit code)..."
       set +e
-      docker manifest inspect douglasparker/byond:$BYOND_VERSION
+      docker manifest inspect "$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$BYOND_VERSION"
       echo "Enabling exit on error (non-zero exit code)..."
       set -e
       if [ $? -eq 0 ]; then
@@ -54,23 +54,23 @@ build:
       fi
 
       echo "Building the Docker images..."
-      docker build --build-arg BYOND_MAJOR=$BYOND_MAJOR_VERSION --build-arg BYOND_MINOR=$BYOND_MINOR_VERSION \
-        -t $CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:latest \
-        -t $CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$BYOND_VERSION \
-        -t $CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$BYOND_MAJOR_VERSION \
-        -t $CI_REGISTRY_IMAGE:latest \
-        -t $CI_REGISTRY_IMAGE:$BYOND_VERSION \
-        -t $CI_REGISTRY_IMAGE:$BYOND_MAJOR_VERSION \
+      docker build --build-arg BYOND_MAJOR="$BYOND_MAJOR_VERSION" --build-arg BYOND_MINOR="$BYOND_MINOR_VERSION" \
+        -t "$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:latest" \
+        -t "$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$BYOND_VERSION" \
+        -t "$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$BYOND_MAJOR_VERSION" \
+        -t "$CI_REGISTRY_IMAGE:latest" \
+        -t "$CI_REGISTRY_IMAGE:$BYOND_VERSION" \
+        -t "$CI_REGISTRY_IMAGE:$BYOND_MAJOR_VERSION" \
         .
       
       echo "Saving the Docker images..."
-      docker save --output $CI_PROJECT_DIR/docker.tar \
-        $CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:latest \
-        $CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$BYOND_VERSION \
-        $CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$BYOND_MAJOR_VERSION \
-        $CI_REGISTRY_IMAGE:latest \
-        $CI_REGISTRY_IMAGE:$BYOND_VERSION \
-        $CI_REGISTRY_IMAGE:$BYOND_MAJOR_VERSION
+      docker save --output "$CI_PROJECT_DIR/docker.tar" \
+        "$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:latest" \
+        "$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$BYOND_VERSION" \
+        "$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$BYOND_MAJOR_VERSION" \
+        "$CI_REGISTRY_IMAGE:latest" \
+        "$CI_REGISTRY_IMAGE:$BYOND_VERSION" \
+        "$CI_REGISTRY_IMAGE:$BYOND_MAJOR_VERSION"
 
 publish:
   stage: build
@@ -79,27 +79,27 @@ publish:
     - schedules
     - triggers
   cache:
-    key: $CI_PIPELINE_ID
+    key: "$CI_PIPELINE_ID"
     policy: pull
     paths:
-      - $CI_PROJECT_DIR/docker.tar
+      - "$CI_PROJECT_DIR/docker.tar"
   script:
     - |
-      if [ $DOCKER_MANIFEST_EXISTS -eq 0 ]; then
+      if [ "$DOCKER_MANIFEST_EXISTS" -eq 0 ]; then
         echo "Logging into the DockerHub Registry..."
-        docker login --username $DOCKER_USERNAME --password $DOCKER_TOKEN
+        docker login --username "$DOCKER_USERNAME" --password "$DOCKER_TOKEN"
 
         echo "Logging into the GitLab Container Registry..."
-        docker login $CI_REGISTRY --username $CI_REGISTRY_USER --password $CI_REGISTRY_PASSWORD
+        docker login "$CI_REGISTRY" --username "$CI_REGISTRY_USER" --password "$CI_REGISTRY_PASSWORD"
 
         echo "Loading the Docker images..."
-        docker load --input $CI_PROJECT_DIR/docker.tar
+        docker load --input "$CI_PROJECT_DIR/docker.tar"
 
         echo "Publishing the Docker images to the Docker Registry..."
-        docker push --all-tags $CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME
+        docker push --all-tags "$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME"
 
         echo "Publishing the Docker images to the GitLab Container Registry..."
-        docker push --all-tags $CI_REGISTRY_IMAGE
+        docker push --all-tags "$CI_REGISTRY_IMAGE"
       else
         echo "This docker image already exists in the Docker Registry..."
         echo "The publish job has been skipped."
