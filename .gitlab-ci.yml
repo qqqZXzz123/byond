@@ -96,10 +96,14 @@ publish:
         docker load --input "$CI_PROJECT_DIR/docker.tar"
 
         echo "Publishing the Docker images to the Docker Registry..."
-        docker push --all-tags "$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME"
+        docker push "$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$BYOND_VERSION"
+        docker push "$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$BYOND_MAJOR_VERSION"
+        docker push "$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:latest"
 
         echo "Publishing the Docker images to the GitLab Container Registry..."
-        docker push --all-tags "$CI_REGISTRY_IMAGE"
+        docker push "$CI_REGISTRY_IMAGE:$BYOND_VERSION"
+        docker push "$CI_REGISTRY_IMAGE:$BYOND_MAJOR_VERSION"
+        docker push "$CI_REGISTRY_IMAGE:latest"
       else
         echo "This docker image already exists in the Docker Registry..."
         echo "The publish job has been skipped."
