@@ -87,7 +87,7 @@ docker-build-beta:
     reports:
       dotenv: build.env
   cache:
-    key: "$CI_PIPELINE_ID-beta"
+    key: "${CI_PIPELINE_ID}-beta"
     policy: push
     paths:
       - "$CI_PROJECT_DIR/docker.tar"
@@ -189,7 +189,7 @@ publish-beta:
     - schedules
     - triggers
   cache:
-    key: "$CI_PIPELINE_ID-beta"
+    key: "${CI_PIPELINE_ID}-beta"
     policy: pull
     paths:
       - "$CI_PROJECT_DIR/docker.tar"
