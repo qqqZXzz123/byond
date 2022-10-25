@@ -4,10 +4,14 @@ variables:
   BYOND_VERSION: ""
   BYOND_MAJOR_VERSION: ""
   BYOND_MINOR_VERSION: ""
+  BYOND_BETA_VERSION: ""
+  BYOND_BETA_MAJOR_VERSION: ""
+  BYOND_BETA_MINOR_VERSION: ""
   IMAGE_NAME: "$CI_PROJECT_PATH"
   DOCKER_MANIFEST_EXISTS: 0
+  DOCKER_BETA_MANIFEST_EXISTS: 0
 
-build:
+docker-build:
   stage: build
   only:
     - schedules
@@ -53,28 +57,97 @@ build:
         echo "DOCKER_MANIFEST_EXISTS=$DOCKER_MANIFEST_EXISTS" >> build.env
       fi
 
-      echo "Building the Docker images..."
-      docker build --build-arg BYOND_MAJOR="$BYOND_MAJOR_VERSION" --build-arg BYOND_MINOR="$BYOND_MINOR_VERSION" \
-        -t "$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:latest" \
-        -t "$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$BYOND_VERSION" \
-        -t "$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$BYOND_MAJOR_VERSION" \
-        -t "$CI_REGISTRY_IMAGE:latest" \
-        -t "$CI_REGISTRY_IMAGE:$BYOND_VERSION" \
-        -t "$CI_REGISTRY_IMAGE:$BYOND_MAJOR_VERSION" \
-        .
-      
-      echo "Saving the Docker images..."
-      docker save --output "$CI_PROJECT_DIR/docker.tar" \
-        "$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:latest" \
-        "$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$BYOND_VERSION" \
-        "$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$BYOND_MAJOR_VERSION" \
-        "$CI_REGISTRY_IMAGE:latest" \
-        "$CI_REGISTRY_IMAGE:$BYOND_VERSION" \
-        "$CI_REGISTRY_IMAGE:$BYOND_MAJOR_VERSION"
+      if [ "$DOCKER_MANIFEST_EXISTS" -eq 0 ]; then
+        echo "Building the Docker images..."
+        docker build --build-arg BYOND_MAJOR="$BYOND_MAJOR_VERSION" --build-arg BYOND_MINOR="$BYOND_MINOR_VERSION" \
+          -t "$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:latest" \
+          -t "$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$BYOND_VERSION" \
+          -t "$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$BYOND_MAJOR_VERSION" \
+          -t "$CI_REGISTRY_IMAGE:latest" \
+          -t "$CI_REGISTRY_IMAGE:$BYOND_VERSION" \
+          -t "$CI_REGISTRY_IMAGE:$BYOND_MAJOR_VERSION" \
+          .
+        
+        echo "Saving the Docker images..."
+        docker save --output "$CI_PROJECT_DIR/docker.tar" \
+          "$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:latest" \
+          "$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$BYOND_VERSION" \
+          "$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$BYOND_MAJOR_VERSION" \
+          "$CI_REGISTRY_IMAGE:latest" \
+          "$CI_REGISTRY_IMAGE:$BYOND_VERSION" \
+          "$CI_REGISTRY_IMAGE:$BYOND_MAJOR_VERSION"
+      fi
+
+docker-build-beta:
+  stage: build
+  only:
+    - schedules
+    - triggers
+  artifacts:
+    reports:
+      dotenv: build.env
+  cache:
+    key: "$CI_PIPELINE_ID-beta"
+    policy: push
+    paths:
+      - "$CI_PROJECT_DIR/docker.tar"
+  before_script:
+    - |
+      apk update
+      apk add curl
+  script:
+    - |
+      echo "Checking for the latest BYOND beta version..."
+      BYOND_BETA_VERSION=$(sed -n 2p <(curl https://secure.byond.com/download/version.txt))
+      BYOND_BETA_MAJOR_VERSION="$(echo "$(cut -d '.' -f 1 <(echo "$BYOND_BETA_VERSION"))")"
+      BYOND_BETA_MINOR_VERSION="$(echo "$(cut -d '.' -f 2 <(echo "$BYOND_BETA_VERSION"))")"
+      echo "BYOND_BETA_VERSION=$BYOND_BETA_VERSION" >> build.env
+      echo "BYOND_BETA_MAJOR_VERSION=$BYOND_BETA_MAJOR_VERSION" >> build.env
+      echo "BYOND_BETA_MINOR_VERSION=$BYOND_BETA_MINOR_VERSION" >> build.env
+
+      echo "Logging into the DockerHub Registry..."
+      docker login --username "$DOCKER_USERNAME" --password "$DOCKER_TOKEN"
+
+      echo "Logging into the GitLab Container Registry..."
+      docker login "$CI_REGISTRY" --username "$CI_REGISTRY_USER" --password "$CI_REGISTRY_PASSWORD"
+
+      echo "Checking if this beta release was already published to the DockerHub Registry..."
+      # Disable exit on error (non-zero exit code) to ensure pipelines don't fail when `docker manifest inspect` returns 0
+      echo "Disabling exit on error (non-zero exit code)..."
+      set +e
+      docker manifest inspect "$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$BYOND_BETA_VERSION"
+      echo "Enabling exit on error (non-zero exit code)..."
+      set -e
+      if [ $? -eq 0 ]; then
+        echo "An existing tag was found!"
+        DOCKER_BETA_MANIFEST_EXISTS=1
+        echo "DOCKER_BETA_MANIFEST_EXISTS=$DOCKER_BETA_MANIFEST_EXISTS" >> build.env
+      fi
+
+      if [ "$DOCKER_BETA_MANIFEST_EXISTS" -eq 0 ]; then
+        echo "Building the Docker images..."
+        docker build --build-arg BYOND_MAJOR="$BYOND_BETA_VERSION" --build-arg BYOND_MINOR="$BYOND_BETA_VERSION" \
+          -t "$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:beta" \
+          -t "$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$BYOND_BETA_VERSION-beta" \
+          -t "$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$BYOND_BETA_MAJOR_VERSION-beta" \
+          -t "$CI_REGISTRY_IMAGE:beta" \
+          -t "$CI_REGISTRY_IMAGE:$BYOND_BETA_VERSION-beta" \
+          -t "$CI_REGISTRY_IMAGE:$BYOND_BETA_MAJOR_VERSION-beta" \
+          .
+        
+        echo "Saving the Docker images..."
+        docker save --output "$CI_PROJECT_DIR/docker-beta.tar" \
+          "$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:beta" \
+          "$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$BYOND_BETA_VERSION-beta" \
+          "$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$BYOND_BETA_MAJOR_VERSION-beta" \
+          "$CI_REGISTRY_IMAGE:beta" \
+          "$CI_REGISTRY_IMAGE:$BYOND_BETA_VERSION-beta" \
+          "$CI_REGISTRY_IMAGE:$BYOND_BETA_MAJOR_VERSION-beta"
+      fi
 
 publish:
   stage: build
-  needs: ["build"]
+  needs: ["docker-build"]
   only:
     - schedules
     - triggers
@@ -109,3 +182,40 @@ publish:
         echo "The publish job has been skipped."
       fi
 
+publish-beta:
+  stage: build
+  needs: ["docker-build-beta"]
+  only:
+    - schedules
+    - triggers
+  cache:
+    key: "$CI_PIPELINE_ID-beta"
+    policy: pull
+    paths:
+      - "$CI_PROJECT_DIR/docker.tar"
+  script:
+    - |
+      if [ "$DOCKER_BETA_MANIFEST_EXISTS" -eq 0 ]; then
+        echo "Logging into the DockerHub Registry..."
+        docker login --username "$DOCKER_USERNAME" --password "$DOCKER_TOKEN"
+
+        echo "Logging into the GitLab Container Registry..."
+        docker login "$CI_REGISTRY" --username "$CI_REGISTRY_USER" --password "$CI_REGISTRY_PASSWORD"
+
+        echo "Loading the Docker images..."
+        docker load --input "$CI_PROJECT_DIR/docker-beta.tar"
+
+        echo "Publishing the Docker images to the Docker Registry..."
+        docker push "$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$BYOND_BETA_VERSION-beta"
+        docker push "$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$BYOND_BETA_MAJOR_VERSION-beta"
+        docker push "$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:beta"
+
+        echo "Publishing the Docker images to the GitLab Container Registry..."
+        docker push "$CI_REGISTRY_IMAGE:$BYOND_BETA_VERSION-beta"
+        docker push "$CI_REGISTRY_IMAGE:$BYOND_BETA_MAJOR_VERSION-beta"
+        docker push "$CI_REGISTRY_IMAGE:beta"
+      else
+        echo "This docker image already exists in the Docker Registry..."
+        echo "The publish job has been skipped."
+      fi
+      
