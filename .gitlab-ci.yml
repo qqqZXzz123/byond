@@ -49,13 +49,13 @@ docker-build:
       echo "Disabling exit on error (non-zero exit code)..."
       set +e
       docker manifest inspect "$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$BYOND_VERSION"
-      echo "Enabling exit on error (non-zero exit code)..."
-      set -e
       if [ $? -eq 0 ]; then
         echo "An existing tag was found!"
         DOCKER_MANIFEST_EXISTS=1
         echo "DOCKER_MANIFEST_EXISTS=$DOCKER_MANIFEST_EXISTS" >> build.env
       fi
+      echo "Enabling exit on error (non-zero exit code)..."
+      set -e
 
       if [ "$DOCKER_MANIFEST_EXISTS" -eq 0 ]; then
         echo "Building the Docker images..."
@@ -116,13 +116,13 @@ docker-build-beta:
       echo "Disabling exit on error (non-zero exit code)..."
       set +e
       docker manifest inspect "$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$BYOND_BETA_VERSION"
-      echo "Enabling exit on error (non-zero exit code)..."
-      set -e
       if [ $? -eq 0 ]; then
         echo "An existing tag was found!"
         DOCKER_BETA_MANIFEST_EXISTS=1
         echo "DOCKER_BETA_MANIFEST_EXISTS=$DOCKER_BETA_MANIFEST_EXISTS" >> build.env
       fi
+      echo "Enabling exit on error (non-zero exit code)..."
+      set -e
 
       if [ "$DOCKER_BETA_MANIFEST_EXISTS" -eq 0 ]; then
         echo "Building the Docker images..."
