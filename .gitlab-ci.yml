@@ -136,7 +136,7 @@ docker-build-beta:
           .
         
         echo "Saving the Docker images..."
-        docker save --output "$CI_PROJECT_DIR/docker-beta.tar" \
+        docker save --output "$CI_PROJECT_DIR/docker.tar" \
           "$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:beta" \
           "$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$BYOND_BETA_VERSION-beta" \
           "$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$BYOND_BETA_MAJOR_VERSION-beta" \
@@ -203,7 +203,7 @@ publish-beta:
         docker login "$CI_REGISTRY" --username "$CI_REGISTRY_USER" --password "$CI_REGISTRY_PASSWORD"
 
         echo "Loading the Docker images..."
-        docker load --input "$CI_PROJECT_DIR/docker-beta.tar"
+        docker load --input "$CI_PROJECT_DIR/docker.tar"
 
         echo "Publishing the Docker images to the Docker Registry..."
         docker push "$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$BYOND_BETA_VERSION-beta"
