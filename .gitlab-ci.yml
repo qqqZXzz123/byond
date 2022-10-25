@@ -115,7 +115,7 @@ docker-build-beta:
       # Disable exit on error (non-zero exit code) to ensure pipelines don't fail when `docker manifest inspect` returns 0
       echo "Disabling exit on error (non-zero exit code)..."
       set +e
-      docker manifest inspect "$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$BYOND_BETA_VERSION"
+      docker manifest inspect "$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$BYOND_BETA_VERSION-beta"
       if [ $? -eq 0 ]; then
         echo "An existing tag was found!"
         DOCKER_BETA_MANIFEST_EXISTS=1
