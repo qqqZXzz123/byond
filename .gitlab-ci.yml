@@ -17,13 +17,11 @@ docker-build:
     - schedules
     - triggers
   artifacts:
+    paths:
+      - docker.tar
     reports:
       dotenv: build.env
-  cache:
-    key: "$CI_PIPELINE_ID"
-    policy: push
-    paths:
-      - "$CI_PROJECT_DIR/docker.tar"
+    expire_in: 1 hrs
   before_script:
     - |
       apk update
@@ -84,13 +82,11 @@ docker-build-beta:
     - schedules
     - triggers
   artifacts:
+    paths:
+      - docker.tar
     reports:
       dotenv: build.env
-  cache:
-    key: "${CI_PIPELINE_ID}-beta"
-    policy: push
-    paths:
-      - "$CI_PROJECT_DIR/docker.tar"
+    expire_in: 1 hrs
   before_script:
     - |
       apk update
@@ -148,14 +144,11 @@ docker-build-beta:
 publish:
   stage: build
   needs: ["docker-build"]
+  dependencies:
+    - docker-build
   only:
     - schedules
     - triggers
-  cache:
-    key: "$CI_PIPELINE_ID"
-    policy: pull
-    paths:
-      - "$CI_PROJECT_DIR/docker.tar"
   script:
     - |
       if [ "$DOCKER_MANIFEST_EXISTS" -eq 0 ]; then
@@ -185,14 +178,11 @@ publish:
 publish-beta:
   stage: build
   needs: ["docker-build-beta"]
+  dependencies:
+    - docker-build-beta
   only:
     - schedules
     - triggers
-  cache:
-    key: "${CI_PIPELINE_ID}-beta"
-    policy: pull
-    paths:
-      - "$CI_PROJECT_DIR/docker.tar"
   script:
     - |
       if [ "$DOCKER_BETA_MANIFEST_EXISTS" -eq 0 ]; then
