@@ -22,12 +22,12 @@ jobs:
 
       - name: Check for the latest version of BYOND
         run: |
-          BYOND_VERSION=$(sed -n 1p <(curl https://secure.byond.com/download/version.txt))
+          BYOND_VERSION="$(sed -n 1p <(curl https://secure.byond.com/download/version.txt))"
           BYOND_MAJOR_VERSION="$(echo "$(cut -d '.' -f 1 <(echo "$BYOND_VERSION"))")"
           BYOND_MINOR_VERSION="$(echo "$(cut -d '.' -f 2 <(echo "$BYOND_VERSION"))")"
-          echo 'BYOND_VERSION="$BYOND_VERSION"' >> $GITHUB_ENV
-          echo 'BYOND_MAJOR_VERSION="$BYOND_MAJOR_VERSION"' >> $GITHUB_ENV
-          echo 'BYOND_MINOR_VERSION="$BYOND_MINOR_VERSION"' >> $GITHUB_ENV
+          echo "BYOND_VERSION="$BYOND_VERSION"" >> $GITHUB_ENV
+          echo "BYOND_MAJOR_VERSION="$BYOND_MAJOR_VERSION"" >> $GITHUB_ENV
+          echo "BYOND_MINOR_VERSION="$BYOND_MINOR_VERSION"" >> $GITHUB_ENV
       
       - name: Login to the Docker Hub Registry
         uses: docker/login-action@v2
