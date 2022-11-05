@@ -23,7 +23,7 @@ jobs:
       - name: Checkout the repository
         uses: actions/checkout@v3
 
-      - name: Check for the latest version of BYOND
+      - name: Check for the latest stable version of BYOND
         run: |
           BYOND_VERSION="$(sed -n 1p <(curl https://secure.byond.com/download/version.txt))"
           BYOND_MAJOR_VERSION="$(echo "$(cut -d '.' -f 1 <(echo "$BYOND_VERSION"))")"
@@ -59,7 +59,7 @@ jobs:
         run: |
           docker manifest inspect douglasparker/byond:${{ env.BYOND_BETA_VERSION }}-beta
       
-      - name: \[Stable] Build the Docker image and publish to the Docker Registry
+      - name: Build the stable Docker image and publish to the Docker Registry
         uses: docker/build-push-action@v3
         if: steps.docker_stable_release_check.outcome == 'failure'
         with:
@@ -73,7 +73,7 @@ jobs:
             ${{ env.IMAGE_NAME }}:${{ env.BYOND_MAJOR_VERSION }}
             ${{ env.IMAGE_NAME }}:${{ env.BYOND_VERSION }}
       
-      - name: \[Beta] Build the Docker image and publish to the Docker Registry
+      - name: Build the beta Docker image and publish to the Docker Registry
         uses: docker/build-push-action@v3
         if: steps.docker_beta_release_check.outcome == 'failure'
         with:
