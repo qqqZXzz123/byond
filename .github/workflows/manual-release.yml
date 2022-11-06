@@ -41,15 +41,23 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       
-      - name: Check if the release was already published to the Docker Registry
-        id: docker_release_check
+      - name: Check if the stable release was already published to the Docker Registry
+        id: docker_stable_release_check
+        if: ${{ github.event.inputs.beta == 'false' }}
+        continue-on-error: true
+        run: |
+          docker manifest inspect douglasparker/byond:${{ env.BYOND_VERSION }}
+      
+      - name: Check if the beta release was already published to the Docker Registry
+        id: docker_beta_release_check
+        if: ${{ github.event.inputs.beta == 'true' }}
         continue-on-error: true
         run: |
           docker manifest inspect douglasparker/byond:${{ env.BYOND_VERSION }}
       
       - name: Build the stable Docker image and publish to the Docker Registry
         uses: docker/build-push-action@v3
-        if: steps.docker_release_check.outcome == 'failure' && ${{ github.event.inputs.version }} == 'false'
+        if: ${{ steps.docker_release_check.outcome == 'failure' && github.event.inputs.beta == 'false' }}
         with:
           context: .
           push: true
@@ -61,7 +69,7 @@ jobs:
       
       - name: Build the beta Docker image and publish to the Docker Registry
         uses: docker/build-push-action@v3
-        if: steps.docker_release_check.outcome == 'failure' && ${{ github.event.inputs.version }} == 'true'
+        if: ${{ steps.docker_release_check.outcome == 'failure' && github.event.inputs.beta == 'true' }}
         with:
           context: .
           push: true
