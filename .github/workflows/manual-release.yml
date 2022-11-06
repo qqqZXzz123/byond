@@ -53,7 +53,7 @@ jobs:
         if: ${{ github.event.inputs.beta == 'true' }}
         continue-on-error: true
         run: |
-          docker manifest inspect douglasparker/byond:${{ env.BYOND_VERSION }}
+          docker manifest inspect douglasparker/byond:${{ env.BYOND_VERSION }}-beta
       
       - name: Build the stable Docker image and publish to the Docker Registry
         uses: docker/build-push-action@v3
