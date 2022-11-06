@@ -47,9 +47,9 @@ jobs:
         run: |
           docker manifest inspect douglasparker/byond:${{ env.BYOND_VERSION }}
       
-      - name: Build the Docker image and publish to the Docker Registry
+      - name: Build the stable Docker image and publish to the Docker Registry
         uses: docker/build-push-action@v3
-        if: steps.docker_release_check.outcome == 'failure'
+        if: steps.docker_release_check.outcome == 'failure' && ${{ github.event.inputs.version }} == 'false'
         with:
           context: .
           push: true
@@ -58,3 +58,15 @@ jobs:
             BYOND_MINOR=${{ env.BYOND_MINOR_VERSION }}
           tags: |
             ${{ env.IMAGE_NAME }}:${{ env.BYOND_VERSION }}
+      
+      - name: Build the beta Docker image and publish to the Docker Registry
+        uses: docker/build-push-action@v3
+        if: steps.docker_release_check.outcome == 'failure' && ${{ github.event.inputs.version }} == 'true'
+        with:
+          context: .
+          push: true
+          build-args: |
+            BYOND_MAJOR=${{ env.BYOND_MAJOR_VERSION }}
+            BYOND_MINOR=${{ env.BYOND_MINOR_VERSION }}
+          tags: |
+            ${{ env.IMAGE_NAME }}:${{ env.BYOND_VERSION }}-beta
