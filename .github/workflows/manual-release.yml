@@ -57,7 +57,7 @@ jobs:
       
       - name: Build the stable Docker image and publish to the Docker Registry
         uses: docker/build-push-action@v3
-        if: ${{ steps.docker_release_check.outcome == 'failure' && github.event.inputs.beta == 'false' }}
+        if: ${{ steps.docker_stable_release_check.outcome == 'failure' && github.event.inputs.beta == 'false' }}
         with:
           context: .
           push: true
@@ -69,7 +69,7 @@ jobs:
       
       - name: Build the beta Docker image and publish to the Docker Registry
         uses: docker/build-push-action@v3
-        if: ${{ steps.docker_release_check.outcome == 'failure' && github.event.inputs.beta == 'true' }}
+        if: ${{ steps.docker_beta_release_check.outcome == 'failure' && github.event.inputs.beta == 'true' }}
         with:
           context: .
           push: true
