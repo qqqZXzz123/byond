@@ -1,7 +1,9 @@
 # BYOND
 
-[![Docker Pulls](https://img.shields.io/docker/pulls/douglasparker/byond)](https://hub.docker.com/r/douglasparker/byond)
-[![License](https://img.shields.io/github/license/douglasparker/byond)](https://github.com/douglasparker/byond/blob/release/LICENSE)
+[![Version](https://img.shields.io/docker/v/douglasparker/byond?style=flat-square)](https://hub.docker.com/r/douglasparker/byond)
+[![Docker Pulls](https://img.shields.io/docker/pulls/douglasparker/byond?style=flat-square)](https://hub.docker.com/r/douglasparker/byond)
+[![Image Size](https://img.shields.io/docker/image-size/douglasparker/byond?style=flat-square)](https://hub.docker.com/r/douglasparker/byond)
+[![License](https://img.shields.io/github/license/douglasparker/byond?style=flat-square)](https://github.com/douglasparker/byond/blob/main/LICENSE.md)
 
 A docker image for building and hosting games made in the BYOND Engine.
 
