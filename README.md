@@ -29,7 +29,7 @@ docker run --detach \
   --volume /opt/game:/opt/game \
   --publish 1337:1337 \
   --restart unless-stopped \
-  douglasparker/byond:latest DreamDaemon /opt/game/game.dmb -ports 1337
+  ghcr.io/douglasparker/byond:latest DreamDaemon /opt/game/game.dmb -ports 1337
 ```
 
 ### Docker Compose
@@ -39,7 +39,7 @@ docker run --detach \
 ```docker
 services:
   byond:
-    image: douglasparker/byond:latest
+    image: ghcr.io/douglasparker/byond:latest
     container_name: "game"
     command: "DreamDaemon /opt/game/game.dmb -ports 1337"
     volumes:
@@ -58,5 +58,5 @@ Example usage to build your projects.
 ```docker
 docker run --rm \
   --volume /opt/game:/opt/game \
-  douglasparker/byond:latest DreamMaker /opt/game/game.dme
+  ghcr.io/douglasparker/byond:latest DreamMaker /opt/game/game.dme
 ```
