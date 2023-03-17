@@ -41,7 +41,7 @@ jobs:
           echo "BYOND_BETA_MAJOR_VERSION="$BYOND_BETA_MAJOR_VERSION"" >> $GITHUB_ENV
           echo "BYOND_BETA_MINOR_VERSION="$BYOND_BETA_MINOR_VERSION"" >> $GITHUB_ENV
       
-      - name: Login to the Docker Hub Registry
+      - name: Login to the Docker Registry
         uses: docker/login-action@v2
         with:
           registry: ${{ env.REGISTRY }}
