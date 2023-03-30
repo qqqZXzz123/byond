@@ -1,7 +1,5 @@
 FROM i386/ubuntu:18.04
 
-LABEL org.opencontainers.image.source https://github.com/douglasparker/byond
-
 ARG BYOND_MAJOR
 ARG BYOND_MINOR
 
