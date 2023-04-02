@@ -7,7 +7,6 @@ variables:
   BYOND_BETA_VERSION: ""
   BYOND_BETA_MAJOR_VERSION: ""
   BYOND_BETA_MINOR_VERSION: ""
-  IMAGE_NAME: "$CI_PROJECT_PATH"
   DOCKER_MANIFEST_EXISTS: 0
   DOCKER_BETA_MANIFEST_EXISTS: 0
 
@@ -36,9 +35,6 @@ docker-build:
       echo "BYOND_MAJOR_VERSION=$BYOND_MAJOR_VERSION" >> build.env
       echo "BYOND_MINOR_VERSION=$BYOND_MINOR_VERSION" >> build.env
 
-      echo "Logging into the DockerHub Registry..."
-      docker login --username "$DOCKER_USERNAME" --password "$DOCKER_TOKEN"
-
       echo "Logging into the GitLab Container Registry..."
       docker login "$CI_REGISTRY" --username "$CI_REGISTRY_USER" --password "$CI_REGISTRY_PASSWORD"
 
@@ -58,9 +54,6 @@ docker-build:
       if [ "$DOCKER_MANIFEST_EXISTS" -eq 0 ]; then
         echo "Building the Docker images..."
         docker build --build-arg BYOND_MAJOR="$BYOND_MAJOR_VERSION" --build-arg BYOND_MINOR="$BYOND_MINOR_VERSION" \
-          -t "$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:latest" \
-          -t "$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$BYOND_VERSION" \
-          -t "$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$BYOND_MAJOR_VERSION" \
           -t "$CI_REGISTRY_IMAGE:latest" \
           -t "$CI_REGISTRY_IMAGE:$BYOND_VERSION" \
           -t "$CI_REGISTRY_IMAGE:$BYOND_MAJOR_VERSION" \
@@ -68,9 +61,6 @@ docker-build:
         
         echo "Saving the Docker images..."
         docker save --output "$CI_PROJECT_DIR/docker.tar" \
-          "$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:latest" \
-          "$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$BYOND_VERSION" \
-          "$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$BYOND_MAJOR_VERSION" \
           "$CI_REGISTRY_IMAGE:latest" \
           "$CI_REGISTRY_IMAGE:$BYOND_VERSION" \
           "$CI_REGISTRY_IMAGE:$BYOND_MAJOR_VERSION"
@@ -101,9 +91,6 @@ docker-build-beta:
       echo "BYOND_BETA_MAJOR_VERSION=$BYOND_BETA_MAJOR_VERSION" >> build.env
       echo "BYOND_BETA_MINOR_VERSION=$BYOND_BETA_MINOR_VERSION" >> build.env
 
-      echo "Logging into the DockerHub Registry..."
-      docker login --username "$DOCKER_USERNAME" --password "$DOCKER_TOKEN"
-
       echo "Logging into the GitLab Container Registry..."
       docker login "$CI_REGISTRY" --username "$CI_REGISTRY_USER" --password "$CI_REGISTRY_PASSWORD"
 
@@ -123,9 +110,6 @@ docker-build-beta:
       if [ "$DOCKER_BETA_MANIFEST_EXISTS" -eq 0 ]; then
         echo "Building the Docker images..."
         docker build --build-arg BYOND_MAJOR="$BYOND_BETA_MAJOR_VERSION" --build-arg BYOND_MINOR="$BYOND_BETA_MINOR_VERSION" \
-          -t "$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:beta" \
-          -t "$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$BYOND_BETA_VERSION-beta" \
-          -t "$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$BYOND_BETA_MAJOR_VERSION-beta" \
           -t "$CI_REGISTRY_IMAGE:beta" \
           -t "$CI_REGISTRY_IMAGE:$BYOND_BETA_VERSION-beta" \
           -t "$CI_REGISTRY_IMAGE:$BYOND_BETA_MAJOR_VERSION-beta" \
@@ -133,9 +117,6 @@ docker-build-beta:
         
         echo "Saving the Docker images..."
         docker save --output "$CI_PROJECT_DIR/docker.tar" \
-          "$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:beta" \
-          "$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$BYOND_BETA_VERSION-beta" \
-          "$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$BYOND_BETA_MAJOR_VERSION-beta" \
           "$CI_REGISTRY_IMAGE:beta" \
           "$CI_REGISTRY_IMAGE:$BYOND_BETA_VERSION-beta" \
           "$CI_REGISTRY_IMAGE:$BYOND_BETA_MAJOR_VERSION-beta"
@@ -152,19 +133,11 @@ publish:
   script:
     - |
       if [ "$DOCKER_MANIFEST_EXISTS" -eq 0 ]; then
-        echo "Logging into the DockerHub Registry..."
-        docker login --username "$DOCKER_USERNAME" --password "$DOCKER_TOKEN"
-
         echo "Logging into the GitLab Container Registry..."
         docker login "$CI_REGISTRY" --username "$CI_REGISTRY_USER" --password "$CI_REGISTRY_PASSWORD"
 
         echo "Loading the Docker images..."
         docker load --input "$CI_PROJECT_DIR/docker.tar"
-
-        echo "Publishing the Docker images to the Docker Registry..."
-        docker push "$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$BYOND_VERSION"
-        docker push "$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$BYOND_MAJOR_VERSION"
-        docker push "$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:latest"
 
         echo "Publishing the Docker images to the GitLab Container Registry..."
         docker push "$CI_REGISTRY_IMAGE:$BYOND_VERSION"
@@ -186,19 +159,11 @@ publish-beta:
   script:
     - |
       if [ "$DOCKER_BETA_MANIFEST_EXISTS" -eq 0 ]; then
-        echo "Logging into the DockerHub Registry..."
-        docker login --username "$DOCKER_USERNAME" --password "$DOCKER_TOKEN"
-
         echo "Logging into the GitLab Container Registry..."
         docker login "$CI_REGISTRY" --username "$CI_REGISTRY_USER" --password "$CI_REGISTRY_PASSWORD"
 
         echo "Loading the Docker images..."
         docker load --input "$CI_PROJECT_DIR/docker.tar"
-
-        echo "Publishing the Docker images to the Docker Registry..."
-        docker push "$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$BYOND_BETA_VERSION-beta"
-        docker push "$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$BYOND_BETA_MAJOR_VERSION-beta"
-        docker push "$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:beta"
 
         echo "Publishing the Docker images to the GitLab Container Registry..."
         docker push "$CI_REGISTRY_IMAGE:$BYOND_BETA_VERSION-beta"
