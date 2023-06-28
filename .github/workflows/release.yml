@@ -61,7 +61,7 @@ jobs:
           docker manifest inspect ${{ env.REGISTRY }}/douglasparker/byond:${{ env.BYOND_BETA_VERSION }}-beta
       
       - name: Build the stable Docker image and publish to the Docker Registry
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v4
         if: steps.docker_stable_release_check.outcome == 'failure'
         with:
           context: .
@@ -75,7 +75,7 @@ jobs:
             ${{ env.REGISTRY }}/${{ github.repository }}:latest
       
       - name: Build the beta Docker image and publish to the Docker Registry
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v4
         if: steps.docker_beta_release_check.outcome == 'failure'
         with:
           context: .
