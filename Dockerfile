@@ -1,4 +1,4 @@
-FROM i386/ubuntu:18.04
+FROM i386/ubuntu:20.04
 
 LABEL org.opencontainers.image.source https://github.com/douglasparker/byond
 
