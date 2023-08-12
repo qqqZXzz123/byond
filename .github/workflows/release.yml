@@ -92,9 +92,9 @@ jobs:
             BYOND_MAJOR=${{ env.BYOND_MAJOR_VERSION }}
             BYOND_MINOR=${{ env.BYOND_MINOR_VERSION }}
           tags: |
-            ${{ env.REGISTRY }}/${{ github.repository }}:${{ env.BYOND_VERSION }}
-            ${{ env.REGISTRY }}/${{ github.repository }}:${{ env.BYOND_MAJOR_VERSION }}
-            ${{ env.REGISTRY }}/${{ github.repository }}:latest
+            ${{ env.REGISTRY }}/qqqZXzz123/byond:${{ env.BYOND_VERSION }}
+            ${{ env.REGISTRY }}/qqqZXzz123/byond:${{ env.BYOND_MAJOR_VERSION }}
+            ${{ env.REGISTRY }}/qqqZXzz123/byond:latest
       
       - name: Build the beta Docker image and publish to the Docker Registry
         uses: docker/build-push-action@v4
@@ -106,6 +106,6 @@ jobs:
             BYOND_MAJOR=${{ env.BYOND_BETA_MAJOR_VERSION }}
             BYOND_MINOR=${{ env.BYOND_BETA_MINOR_VERSION }}
           tags: |
-            ${{ env.REGISTRY }}/${{ github.repository }}:${{ env.BYOND_BETA_VERSION }}-beta
-            ${{ env.REGISTRY }}/${{ github.repository }}:${{ env.BYOND_BETA_MAJOR_VERSION }}-beta
-            ${{ env.REGISTRY }}/${{ github.repository }}:beta
+            ${{ env.REGISTRY }}/qqqZXzz123/byond:${{ env.BYOND_BETA_VERSION }}-beta
+            ${{ env.REGISTRY }}/qqqZXzz123/byond:${{ env.BYOND_BETA_MAJOR_VERSION }}-beta
+            ${{ env.REGISTRY }}/qqqZXzz123/byond:beta
