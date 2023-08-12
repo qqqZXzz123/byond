@@ -74,13 +74,13 @@ jobs:
         id: docker_stable_release_check
         continue-on-error: true
         run: |
-          docker manifest inspect ${{ env.REGISTRY }}/douglasparker/byond:${{ env.BYOND_VERSION }}
+          docker manifest inspect ${{ env.REGISTRY }}/qqqZXzz123/byond:${{ env.BYOND_VERSION }}
       
       - name: Check if the beta release was already published to the Docker Registry
         id: docker_beta_release_check
         continue-on-error: true
         run: |
-          docker manifest inspect ${{ env.REGISTRY }}/douglasparker/byond:${{ env.BYOND_BETA_VERSION }}-beta
+          docker manifest inspect ${{ env.REGISTRY }}/qqqZXzz123/byond:${{ env.BYOND_BETA_VERSION }}-beta
       
       - name: Build the stable Docker image and publish to the Docker Registry
         uses: docker/build-push-action@v4
