@@ -74,13 +74,13 @@ jobs:
         id: docker_stable_release_check
         continue-on-error: true
         run: |
-          docker manifest inspect ${{ env.REGISTRY }}/qqqZXzz123/byond:${{ env.BYOND_VERSION }}
+          docker manifest inspect ${{ env.REGISTRY }}/qqqzxzz123/byond:${{ env.BYOND_VERSION }}
       
       - name: Check if the beta release was already published to the Docker Registry
         id: docker_beta_release_check
         continue-on-error: true
         run: |
-          docker manifest inspect ${{ env.REGISTRY }}/qqqZXzz123/byond:${{ env.BYOND_BETA_VERSION }}-beta
+          docker manifest inspect ${{ env.REGISTRY }}/qqqzxzz123/byond:${{ env.BYOND_BETA_VERSION }}-beta
       
       - name: Build the stable Docker image and publish to the Docker Registry
         uses: docker/build-push-action@v4
@@ -92,9 +92,9 @@ jobs:
             BYOND_MAJOR=${{ env.BYOND_MAJOR_VERSION }}
             BYOND_MINOR=${{ env.BYOND_MINOR_VERSION }}
           tags: |
-            ${{ env.REGISTRY }}/qqqZXzz123/byond:${{ env.BYOND_VERSION }}
-            ${{ env.REGISTRY }}/qqqZXzz123/byond:${{ env.BYOND_MAJOR_VERSION }}
-            ${{ env.REGISTRY }}/qqqZXzz123/byond:latest
+            ${{ env.REGISTRY }}/qqqzxzz123/byond:${{ env.BYOND_VERSION }}
+            ${{ env.REGISTRY }}/qqqzxzz123/byond:${{ env.BYOND_MAJOR_VERSION }}
+            ${{ env.REGISTRY }}/qqqzxzz123/byond:latest
       
       - name: Build the beta Docker image and publish to the Docker Registry
         uses: docker/build-push-action@v4
@@ -106,6 +106,6 @@ jobs:
             BYOND_MAJOR=${{ env.BYOND_BETA_MAJOR_VERSION }}
             BYOND_MINOR=${{ env.BYOND_BETA_MINOR_VERSION }}
           tags: |
-            ${{ env.REGISTRY }}/qqqZXzz123/byond:${{ env.BYOND_BETA_VERSION }}-beta
-            ${{ env.REGISTRY }}/qqqZXzz123/byond:${{ env.BYOND_BETA_MAJOR_VERSION }}-beta
-            ${{ env.REGISTRY }}/qqqZXzz123/byond:beta
+            ${{ env.REGISTRY }}/qqqzxzz123/byond:${{ env.BYOND_BETA_VERSION }}-beta
+            ${{ env.REGISTRY }}/qqqzxzz123/byond:${{ env.BYOND_BETA_MAJOR_VERSION }}-beta
+            ${{ env.REGISTRY }}/qqqzxzz123/byond:beta
